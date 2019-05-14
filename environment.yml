@@ -64,16 +64,27 @@ dependencies:
   - zlib=1.2.11=h1de35cc_1004
   - anaconda=custom=py37_0
   - pip:
+    - absl-py==0.7.1
+    - astor==0.7.1
+    - gast==0.2.2
+    - grpcio==1.20.1
     - h5py==2.9.0
     - hep-ml==0.6.0
     - keras==2.2.4
     - keras-applications==1.0.7
     - keras-preprocessing==1.0.9
+    - markdown==3.1
     - mock==3.0.5
     - numexpr==2.6.9
+    - protobuf==3.7.1
     - pyyaml==5.1
     - src==0.1.0
     - tables==3.5.1
+    - tensorboard==1.13.1
+    - tensorflow==1.13.1
+    - tensorflow-estimator==1.13.0
+    - termcolor==1.1.0
     - theano==1.0.4
+    - werkzeug==0.15.3
 prefix: /Users/bryan/anaconda/envs/massagnosticjettaggers
 
