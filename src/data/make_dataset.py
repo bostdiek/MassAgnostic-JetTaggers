@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 # from dotenv import find_dotenv, load_dotenv
 from subprocess import call
+from process_data import process_data
 
 project_dir = Path(__file__).resolve().parents[2]
 
@@ -39,13 +40,31 @@ def download_raw_data():
             logger.info('Download finished')
 
 
+def SplitAndScale():
+    basedr = 'data/interim/'
+    logger = logging.getLogger(__name__)
+    for prong in range(2, 5):
+        train_scaled = 'train_scaled_X_{0}p.npy'.format(prong)
+        p_name = project_dir.joinpath(basedr + train_scaled)
+        name_str = p_name.resolve()
+
+        if p_name.exists():
+            logger.info('The file {0} has already been processed'.format(name_str))
+        else:
+            logger.info('starting processing {0} prong data'.format(prong))
+            process_data(prong)
+            logger.info('finished processing {0} prong data'.format(prong))
+
+
 def main():
     """ Runs data processing scripts to turn raw data from (../raw) into
         cleaned data ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
-    logger.info('downloading the raw data')
-    download_raw_data()
+    # logger.info('downloading the raw data')
+    # download_raw_data()
+    logger.info('processing the raw data')
+    SplitAndScale()
 
 
 if __name__ == '__main__':
