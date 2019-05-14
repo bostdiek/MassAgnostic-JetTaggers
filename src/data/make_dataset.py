@@ -44,7 +44,7 @@ def main():
         cleaned data ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
+    logger.info('downloading the raw data')
     download_raw_data()
 
 
