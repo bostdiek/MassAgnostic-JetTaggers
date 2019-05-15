@@ -100,10 +100,22 @@ def process_data(prong):
     X_train = X_train[:, 1:]
     X_test = X_test[:, 1:]
     X_val = X_val[:, 1:]
+    np.save('data/interim/train_X_{0}p.npy'.format(prong),
+            X_train
+            )
+    np.save('data/interim/test_X_{0}p.npy'.format(prong),
+            X_test
+            )
+    np.save('data/interim/val_X_{0}p.npy'.format(prong),
+            X_val
+            )
 
     class_weights = {1: float(len(X_train)) / np.sum(y_train == 1),
                      0: float(len(X_train)) / np.sum(y_train == 0)
                      }
+    print(class_weights)
+    with open('data/interim/class_weights_{0}p.p'.format(prong), 'wb') as cf:
+        pickle.dump(class_weights, cf)
 
     val_weights = np.ones_like(y_val)
     val_weights[y_val == 0] = class_weights[0]

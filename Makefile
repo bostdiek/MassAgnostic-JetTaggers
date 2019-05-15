@@ -1,4 +1,4 @@
-.PHONY: clean data lint requirements
+.PHONY: clean data lint requirements base_nn
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -15,6 +15,17 @@ HAS_CONDA=False
 else
 HAS_CONDA=True
 endif
+
+ifeq ($(CONDA_DEFAULT_ENV),$(PROJECT_NAME))
+    ACTIVATE_ENV := true
+else
+    ACTIVATE_ENV := source activate $(PROJECT_NAME)
+endif
+
+# Execute python related functionalities from within the project's environment
+define execute_in_env
+    $(ACTIVATE_ENV) && $1
+endef
 
 #################################################################################
 # COMMANDS                                                                      #
@@ -34,6 +45,12 @@ requirements: test_environment
 ## Make Dataset
 data: requirements
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py
+
+## Make Base networks
+base_nn: data
+	$(PYTHON_INTERPRETER) src/models/train_base_nn.py --prong=2
+	$(PYTHON_INTERPRETER) src/models/train_base_nn.py --prong=3
+	$(PYTHON_INTERPRETER) src/models/train_base_nn.py --prong=4
 
 ## Delete all compiled Python files
 clean:
