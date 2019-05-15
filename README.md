@@ -5,11 +5,19 @@ Explore the different methods to decorrelate jet mass from ML taggers.
 ## Getting started
 For reproducibility, we have included the environment we used.
 To generate this environment (conda is required)
+### Environment
 ```
 make create_environment
 conda activate massagnosticjettaggers
 ```
+### Data
 All of the preprocessing of the data can be done with `make data`
+### Models
+The models have already been trained, and the training takes quite a bit of time. However, they can be retrained using
+```
+make base_nn
+make uBoost
+```
 
 ## Project Organization
 
