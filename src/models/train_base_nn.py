@@ -15,39 +15,14 @@ import numpy as np
 from pathlib import Path
 import pickle
 
-
-def load_data(prong):
-    datadir = 'data/interim/'
-
-    #  Training data
-    train_x_name = 'train_scaled_X_{0}p.npy'.format(prong)
-    X_trainscaled = np.load(datadir + train_x_name)
-    y_train_name = 'train_Y_{0}p.npy'.format(prong)
-    y_train = np.load(datadir + y_train_name)
-
-    # Validation data
-    val_x_name = 'val_scaled_X_{0}p.npy'.format(prong)
-    X_valscaled = np.load(datadir + val_x_name)
-    y_val_name = 'val_Y_{0}p.npy'.format(prong)
-    y_val = np.load(datadir + y_val_name)
-    val_weight_name = 'val_class_weights_indiv_{0}p.npy'.format(prong)
-    val_weights = np.load(datadir + val_weight_name)
-
-    # classes info
-    with open(datadir + 'class_weights_{0}p.p'.format(prong), 'rb') as cf:
-        class_weights = pickle.load(cf)
-
-    return (X_trainscaled, y_train,
-            X_valscaled, y_val, val_weights,
-            class_weights
-            )
+from HelperFunctions import load_data_nn
 
 
 @click.command()
 @click.option('--prong', default=2, type=click.IntRange(2, 4),
               help='How many prongs in signal jets')
 def train_base_classifier(prong):
-    data = load_data(prong)
+    data = load_data_nn(prong)
     X_trainscaled = data[0]
     y_train = data[1]
     X_valscaled = data[2]
