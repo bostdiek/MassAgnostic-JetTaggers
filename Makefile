@@ -1,4 +1,4 @@
-.PHONY: clean data lint requirements base_nn
+.PHONY: clean data lint requirements base_nn uBoost
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -46,13 +46,13 @@ requirements: test_environment
 data: requirements
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py
 
-## Make Base networks
+## Train Base networks
 base_nn: data
 	$(PYTHON_INTERPRETER) src/models/train_base_nn.py --prong=2
 	$(PYTHON_INTERPRETER) src/models/train_base_nn.py --prong=3
 	$(PYTHON_INTERPRETER) src/models/train_base_nn.py --prong=4
 
-## Make uBoost
+## Train uBoost classifiers
 uBoost: data
 	$(PYTHON_INTERPRETER) src/models/train_uBoost.py --prong=2
 	$(PYTHON_INTERPRETER) src/models/train_uBoost.py --prong=3
