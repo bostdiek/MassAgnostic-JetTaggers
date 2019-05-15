@@ -77,7 +77,7 @@ def train_base_classifier(prong):
                                   )
     ClassifierModel.save('models/base_nn_{0}p.h5'.format(prong))
 
-    with open('data/model_histories/base_nn_hist_{0}p.p'.format(prong), 'wb') as f:
+    with open('models/histories/base_nn_hist_{0}p.p'.format(prong), 'wb') as f:
         pickle.dump(history, f)
 
 
