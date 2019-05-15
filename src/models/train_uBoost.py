@@ -67,7 +67,7 @@ def train_uBoost(prong):
     df, y, feats = load_data(prong)
     uniform_features_mass = [feats[0]]
     train_features = feats[1:]
-    print('trying to keep ' + uniform_features_mass +' flat')
+    print('trying to keep ' + uniform_features_mass + ' flat')
 
     n_estimators = 150
     base_estimator = DecisionTreeClassifier(max_depth=4)
