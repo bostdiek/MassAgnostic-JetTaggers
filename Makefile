@@ -52,6 +52,12 @@ base_nn: data
 	$(PYTHON_INTERPRETER) src/models/train_base_nn.py --prong=3
 	$(PYTHON_INTERPRETER) src/models/train_base_nn.py --prong=4
 
+## Make uBoost
+uBoost: data
+	$(PYTHON_INTERPRETER) src/models/train_uBoost.py --prong=2
+	$(PYTHON_INTERPRETER) src/models/train_uBoost.py --prong=3
+	$(PYTHON_INTERPRETER) src/models/train_uBoost.py --prong=4
+
 ## Delete all compiled Python files
 clean:
 	find . -type f -name "*.py[co]" -delete
