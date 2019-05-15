@@ -58,6 +58,12 @@ uBoost: data
 	$(PYTHON_INTERPRETER) src/models/train_uBoost.py --prong=3
 	$(PYTHON_INTERPRETER) src/models/train_uBoost.py --prong=4
 
+## Train Gradient Boosting Classifiers
+GBC: data
+	$(PYTHON_INTERPRETER) src/models/train_AdaBoost.py --prong=2
+	$(PYTHON_INTERPRETER) src/models/train_AdaBoost.py --prong=3
+	$(PYTHON_INTERPRETER) src/models/train_AdaBoost.py --prong=4
+
 ## Delete all compiled Python files
 clean:
 	find . -type f -name "*.py[co]" -delete

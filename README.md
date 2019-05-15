@@ -17,6 +17,7 @@ The models have already been trained, and the training takes quite a bit of time
 ```
 make base_nn
 make uBoost
+make GBC
 ```
 
 ## Project Organization
@@ -56,7 +57,8 @@ make uBoost
     │   │   │                 predictions
     │   │   ├── predict_model.py
     │   │   ├── train_base_nn.py
-    │   │   └── train_uBoost.py
+    │   │   ├── train_uBoost.py
+    │   │   └── train_AdaBoost.py
     │   │
     │   ├── test_metrics   <- Scripts to take histograms and compute metrics
     │   │   └── build_features.py
