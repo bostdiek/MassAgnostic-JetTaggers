@@ -5,6 +5,7 @@ from pathlib import Path
 # from dotenv import find_dotenv, load_dotenv
 from subprocess import call
 from process_data import process_data
+from get_weights_1d import set_weights
 
 project_dir = Path(__file__).resolve().parents[2]
 
@@ -56,6 +57,22 @@ def SplitAndScale():
             logger.info('finished processing {0} prong data'.format(prong))
 
 
+def GetPlaningWeights():
+    basedr = 'data/interim/'
+    logger = logging.getLogger(__name__)
+    for prong in range(2, 5):
+        train_scaled = 'train_planing_weights_{0}p.npy'.format(prong)
+        p_name = project_dir.joinpath(basedr + train_scaled)
+        name_str = p_name.resolve()
+
+        if p_name.exists():
+            logger.info('The weigths {0} have already been processed'.format(name_str))
+        else:
+            logger.info('computing weights {0} prong data'.format(prong))
+            set_weights(prong)
+            logger.info('finished processing {0} prong data'.format(prong))
+
+
 def main():
     """ Runs data processing scripts to turn raw data from (../raw) into
         cleaned data ready to be analyzed (saved in ../processed).
@@ -65,6 +82,8 @@ def main():
     # download_raw_data()
     logger.info('processing the raw data')
     SplitAndScale()
+    logger.info('planing the mass')
+    GetPlaningWeights()
 
 
 if __name__ == '__main__':
