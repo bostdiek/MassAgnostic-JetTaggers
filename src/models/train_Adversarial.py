@@ -22,6 +22,11 @@ import pickle
 
 from HelperFunctions import load_data_nn
 
+import matplotlib
+from matplotlib.colors import LogNorm
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, verbose=1,
                               patience=5, min_lr=1.0e-6)
 es = EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='auto')
@@ -43,14 +48,14 @@ def set_mass_bins(m_train, m_val, y_train):
     mass_bins_setup.sort()
     size = int(len(mass_bins_setup) / 10)
 
-    massbins = [50,
+    massbins = [50-1e-5,
                 mass_bins_setup[size], mass_bins_setup[size * 2],
                 mass_bins_setup[size * 3], mass_bins_setup[size * 4],
                 mass_bins_setup[size * 5], mass_bins_setup[size * 6],
                 mass_bins_setup[size * 7], mass_bins_setup[size * 8],
                 mass_bins_setup[size * 9],
-                400]
-
+                400+1e-5]
+    print(massbins)
     #  get which bin each mass point is if __name__ == '__main__':
     mbin_train = np.digitize(m_train, massbins) - 1
     mbin_val = np.digitize(m_val, massbins) - 1
@@ -78,10 +83,7 @@ def train_Adversary(prong, lam_exp):
     val_weights = data[4]
     class_weights = data[5]
 
-    tr_weights = np.ones_like(y_train)
-    tr_weights[y_train == 0] = class_weights[0]
-    tr_weights[y_train == 1] = class_weights[1]
-    tr_weights = tr_weights.flatten()
+    tr_weights = np.load('data/interim/train_class_weights_indiv_{0}p.npy'.format(prong))
 
     m_train = np.load('data/interim/train_jetmass_{0}p.npy'.format(prong))
     m_val = np.load('data/interim/val_jetmass_{0}p.npy'.format(prong))
@@ -92,18 +94,35 @@ def train_Adversary(prong, lam_exp):
         logger.error('Need to run base neural networks first')
         sys.exit(classifier_name + ' does not exist')
     else:
-        ClassifierModel = load_model(classifier_name)
+        inputs = Input(shape=(X_trainscaled.shape[1], ))
+        Classifier = Dense(50, activation='relu')(inputs)
+        Classifier = Dense(50, activation='relu')(Classifier)
+        Classifier = Dense(50, activation='relu')(Classifier)
+        Classifier = Dense(1, activation='sigmoid')(Classifier)
+        ClassifierModel = Model(inputs=inputs, outputs=Classifier)
+        ClassifierModel.compile(optimizer='adam', loss='binary_crossentropy')
+        ClassifierModel.summary()
+        # history = ClassifierModel.fit(X_trainscaled,
+        #                               y_train,
+        #                               validation_data=[X_valscaled, y_val, val_weights],
+        #                               epochs=100,
+        #                               class_weight=class_weights,
+        #                               callbacks=[reduce_lr, es]
+        #                               )
+        ClassifierModel = load_model('models/base_nn_{0}p.h5'.format(prong))
         ClassifierModel.name = 'Classifier'
+
+        # with open('models/histories/base_nn_hist_{0}p.p'.format(prong), 'wb') as f:
+        #     pickle.dump(history, f)
 
     # ***************************************************
     # Add in the Adversary
     # Now the adversary uses the whole input, but only takes the output of the classifier
     # ***************************************************
-    inputs = Input(shape=(X_trainscaled.shape[1], ))
     Adversary = ClassifierModel(inputs)
-    Adversary = Dense(50, activation='tanh')(Adversary)
-    Adversary = Dense(50, activation='tanh')(Adversary)
-    Adversary = Dense(10, activation='softmax')(Adversary)
+    Adversary = Dense(50, activation='tanh', kernel_initializer='normal')(Adversary)
+    Adversary = Dense(50, activation='tanh', kernel_initializer='normal')(Adversary)
+    Adversary = Dense(10, activation='softmax', kernel_initializer='normal')(Adversary)
 
     # The adversary only is supposed to work on the backround events
     # feed into it the actual label, so that we can make the loss function be 0
@@ -115,13 +134,13 @@ def train_Adversary(prong, lam_exp):
                            outputs=AdversaryC
                            )
 
-    def Make_loss_A(lam):
+    def Make_loss_A(alam):
         def loss(y_true, y_pred):
             y_pred, l_true = y_pred[:, :-1], y_pred[:, -1]  # prediction and label
-
-            return (lam *
-                    K.categorical_crossentropy(y_true, y_pred) * (1 - l_true)
-                    ) / K.sum(1 - l_true)
+            # y_pred = K.clip(y_pred, K.epsilon, 1 - K.epsilon)
+            l_true = K.reshape(l_true, (-1, 1))
+            loss_sum = K.sum(alam * -(y_true * K.log(y_pred)) * (1 - l_true), axis=-1)
+            return K.mean(loss_sum)  # / K.sum(1 - l_true, axis=0)
         return loss
 
     CombinedLoss = Make_loss_A(-lam)
@@ -143,15 +162,84 @@ def train_Adversary(prong, lam_exp):
                                optimizer=Adam()
                                )
         AdversaryModel.summary()
+        # print(np.sum(y_train == 0), np.sum(y_train == 1))
+        # print(np.sum(y_val == 0), np.sum(y_val == 1))
+        #
+        # preds = AdversaryModel.predict([X_trainscaled, y_train], batch_size=1000000)
+        # preds, l_true = preds[:, :-1], preds[:, -1]
+        # print(l_true)
+        # cce = -np.sum(np.log(preds) * mbin_train_labels * (1 - l_true).reshape(-1, 1), axis=-1)
+        # # cce_b = cce * (1 - l_true)
+        # cce_sc = cce / np.sum(1 - l_true)
+        # print(preds)
+        # print(cce)
+        # # print(cce_b)
+        # print(np.sum(cce))
+        # print(cce_sc)
+        # print(np.mean(cce_sc[:32]))
+        # print(np.mean(cce_sc))
+        # print(len(X_trainscaled[::64]))
+        # print(len(X_trainscaled[::64]) * np.mean(cce_sc))
+        # print(AdversaryModel.evaluate(x=[X_trainscaled, y_train],
+        #                               y=mbin_train_labels,
+        #                               batch_size=32,
+        #                               verbose=0
+        #                               ))
+        # print('validation')
+        # preds = AdversaryModel.predict([X_valscaled, y_val], batch_size=1000000)
+        # preds, l_true = preds[:, :-1], preds[:, -1]
+        # print(l_true)
+        # cce = -np.sum(np.log(preds) * mbin_val_labels * (1 - l_true).reshape(-1, 1), axis=-1)
+        # # cce_b = cce * (1 - l_true)
+        # cce_sc = cce / np.sum(1 - l_true)
+        # print(preds)
+        # print(cce)
+        # # print(cce_b)
+        # print(np.sum(cce))
+        # print(cce_sc)
+        # print(np.mean(cce_sc[:32]))
+        # print(np.mean(cce_sc))
+        # print(len(X_trainscaled[::64]))
+        # print(len(X_trainscaled[::64]) * np.mean(cce_sc))
+        # print(AdversaryModel.evaluate(x=[X_valscaled, y_val],
+        #                               y=mbin_val_labels,
+        #                               batch_size=64,
+        #                               verbose=0
+        #                               ))
+        # sys.exit('Full break')
         AdversaryModel.fit(x=[X_trainscaled, y_train],
                            y=mbin_train_labels,
                            validation_data=[[X_valscaled, y_val],
                                             mbin_val_labels],
                            epochs=50,
-                           callbacks=[reduce_lr, es]
+                           # callbacks=[reduce_lr, es]
                            )
+
         AdversaryModel.save_weights(adv_name)
         AdversaryModel.name = 'Adversary'
+
+        preds = AdversaryModel.predict([X_valscaled, y_val])
+        print(preds)
+        print(mbin_val_labels[(y_val == 0).flatten()])
+        print(np.argmax(mbin_val_labels[(y_val == 0).flatten()], axis=-1))
+        plt.figure(figsize=(4, 4))
+        # plt.hist(np.argmax(mbin_val_labels[(y_val == 0).flatten()], axis=-1),
+        #          range=(1,11), bins=10)
+        plt.savefig('InitialAdversaryOnValidation_{0}p.pdf'.format(prong),
+                    bbox_inches='tight'
+                    )
+        print(np.unique(np.argmax(mbin_val_labels[(y_val == 0).flatten()], axis=-1)))
+        print(np.unique(np.argmax(preds[(y_val == 0).flatten()], axis=-1)))
+        plt.hist2d(np.argmax(mbin_val_labels[(y_val == 0).flatten()], axis=-1),
+                   np.argmax(preds[(y_val == 0).flatten()], axis=-1),
+                   bins=(range(0, 11), range(0, 11)),
+                   norm=LogNorm()
+                   )
+        plt.xlabel('Mass (scaled)')
+        plt.ylabel('Predicted')
+        plt.savefig('InitialAdversaryOnValidation_{0}p.pdf'.format(prong),
+                    bbox_inches='tight'
+                    )
     else:
         AdversaryModel.load_weights(adv_name)
         AdversaryModel.name = 'Adversary'
@@ -177,7 +265,7 @@ def train_Adversary(prong, lam_exp):
                                 CombinedLoss],
                           optimizer=ClassOpt
                           )
-    mdir = 'models/adv/lam_{0}_{1}p/'.format(lam, prong)
+    mdir = 'models/adv/lam_{0}_{1}p/'.format(lam_exp, prong)
     if not os.path.isdir(mdir):
         os.mkdir(mdir)
 
@@ -189,10 +277,6 @@ def train_Adversary(prong, lam_exp):
                                                          np.ones_like(val_weights)],
                                           verbose=1
                                           )
-        print([X_valscaled, y_val],
-              [y_val, mbin_val_labels])
-        print(m_losses)
-
         losses["L_C - L_A"].append(m_losses[0][None][0])
         losses["L_C"].append(m_losses[1][None][0])
         losses["L_A"].append(-m_losses[2][None][0])
@@ -214,8 +298,9 @@ def train_Adversary(prong, lam_exp):
                 print('Has not improved in {1} epochs with lr={0:1.01e}'.format(mylr,
                                                                                 count))
         if i % 5 == 0:
-            with open('models/histories/adv_lam_{0}_{1}.p'.format(lam_exp, prong), 'wb') as h:
-                pickle.dump(losses, h)
+            with open('models/histories/adv_lam_{0}_{1}p.p'.format(lam_exp, prong),
+                      'wb') as hf:
+                pickle.dump(losses, hf)
             AdversaryModel.save_weights(mdir + 'Adv_lam_{0}_{1}_weigths_{2}p.h5'.format(lam_exp, i, prong))
             ClassifierModel.save_weights(mdir + 'Class_lam_{0}_{1}_weights_{2}p.h5'.format(lam_exp, i, prong))
 
@@ -258,6 +343,9 @@ def train_Adversary(prong, lam_exp):
     AdversaryModel.save_weights('models/Adv_lam_{0}_final_{1}p.h5'.format(lam_exp, prong))
     ClassifierModel.save('models/nn_with_adv_lam_{0}_final_{1}p.h5'.format(lam_exp, prong))
     ClassifierModel.save_weights('models/nn_with_adv_lam_{0}_final_weights_{1}p.h5'.format(lam_exp, prong))
+    with open('models/histories/adv_lam_{0}_{1}p.p'.format(lam_exp, prong),
+              'wb') as hf:
+        pickle.dump(losses, hf)
 
 
 if __name__ == '__main__':
