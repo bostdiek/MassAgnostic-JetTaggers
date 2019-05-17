@@ -42,6 +42,17 @@ def load_data_bdt(prong):
 
 
 def load_data_nn(prong):
+    '''
+    Input:
+        prong: interger denoting the number of prongs in the signal jets
+    Outputs:
+        X_trainscaled: numpy array of training data scaled and centered
+        y_train: training labels
+        X_valscaled: numpy array of validation data scaled and centered
+        y_val: validation labels
+        val_weights: class weights applied to each element of the validation set
+        class_weights: dictionary to set balanced classes
+    '''
     #  Training data
     train_x_name = 'train_scaled_X_{0}p.npy'.format(prong)
     X_trainscaled = np.load(interim_datadir + train_x_name)
