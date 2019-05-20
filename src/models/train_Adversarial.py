@@ -17,7 +17,7 @@ import logging
 import numpy as np
 import os
 import sys
-from pathlib import Path
+# from pathlib import Path
 import pickle
 
 from HelperFunctions import load_data_nn
@@ -69,11 +69,13 @@ def set_mass_bins(m_train, m_val, y_train):
 @click.command()
 @click.option('--prong', default=2, type=click.IntRange(2, 4),
               help='How many prongs in signal jets')
-@click.option('--lam_exp', default=0, type=click.IntRange(0, 12),
+@click.option('--lam', default=0, type=click.IntRange(0, 12),
               help='Exponential power of lambda')
-def train_Adversary(prong, lam_exp):
+def train_Adversary(prong, lam):
     logger = logging.getLogger(__name__)
-    lam = 10 ** lam_exp
+    # lam_exp -= 2
+    # lam = 10 ** lam_exp
+    lam_exp = '{0:.03e}'.format(np.log10(lam))
     logger.info('Working on lambda={0:0.1e}'.format(lam))
     data = load_data_nn(prong)
     X_trainscaled = data[0]
@@ -270,7 +272,7 @@ def train_Adversary(prong, lam_exp):
         os.mkdir(mdir)
 
     #  Work through the epochs of training
-    for i in range(10):
+    for i in range(500):
         m_losses = CombinedModel.evaluate([X_valscaled, y_val],
                                           [y_val, mbin_val_labels],
                                           sample_weight=[val_weights,
@@ -301,8 +303,8 @@ def train_Adversary(prong, lam_exp):
             with open('models/histories/adv_lam_{0}_{1}p.p'.format(lam_exp, prong),
                       'wb') as hf:
                 pickle.dump(losses, hf)
-            AdversaryModel.save_weights(mdir + 'Adv_lam_{0}_{1}_weigths_{2}p.h5'.format(lam_exp, i, prong))
-            ClassifierModel.save_weights(mdir + 'Class_lam_{0}_{1}_weights_{2}p.h5'.format(lam_exp, i, prong))
+            AdversaryModel.save_weights(mdir + 'Adv_lam_{0}_{1:03}_weigths_{2}p.h5'.format(lam_exp, i, prong))
+            ClassifierModel.save_weights(mdir + 'Class_lam_{0}_{1:03}_weights_{2}p.h5'.format(lam_exp, i, prong))
 
         indices = np.random.permutation(len(X_trainscaled))
 
@@ -353,7 +355,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format=log_fmt)
 
     # not used in this stub but often useful for finding various files
-    project_dir = Path(__file__).resolve().parents[2]
+    # project_dir = Path(__file__).resolve().parents[2]
 
     # find .env automagically by walking up directories until it's found, then
     # load up the .env entries as environment variables
