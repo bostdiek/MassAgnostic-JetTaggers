@@ -69,7 +69,7 @@ def set_mass_bins(m_train, m_val, y_train):
 @click.command()
 @click.option('--prong', default=2, type=click.IntRange(2, 4),
               help='How many prongs in signal jets')
-@click.option('--lam', default=0, type=click.IntRange(0, 12),
+@click.option('--lam', default=0,
               help='Exponential power of lambda')
 def train_Adversary(prong, lam):
     logger = logging.getLogger(__name__)
