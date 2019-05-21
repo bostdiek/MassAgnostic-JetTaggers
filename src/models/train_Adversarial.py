@@ -17,7 +17,7 @@ import logging
 import numpy as np
 import os
 import sys
-# from pathlib import Path
+from pathlib import Path
 import pickle
 
 from HelperFunctions import load_data_nn
@@ -48,13 +48,13 @@ def set_mass_bins(m_train, m_val, y_train):
     mass_bins_setup.sort()
     size = int(len(mass_bins_setup) / 10)
 
-    massbins = [50-1e-5,
+    massbins = [50 - 1e-5,
                 mass_bins_setup[size], mass_bins_setup[size * 2],
                 mass_bins_setup[size * 3], mass_bins_setup[size * 4],
                 mass_bins_setup[size * 5], mass_bins_setup[size * 6],
                 mass_bins_setup[size * 7], mass_bins_setup[size * 8],
                 mass_bins_setup[size * 9],
-                400+1e-5]
+                400 + 1e-5]
     print(massbins)
     #  get which bin each mass point is if __name__ == '__main__':
     mbin_train = np.digitize(m_train, massbins) - 1
@@ -69,13 +69,12 @@ def set_mass_bins(m_train, m_val, y_train):
 @click.command()
 @click.option('--prong', default=2, type=click.IntRange(2, 4),
               help='How many prongs in signal jets')
-@click.option('--lam', default=0,
+
+@click.option('--lam_exp', default=0, type=click.IntRange(0, 12),
               help='Exponential power of lambda')
-def train_Adversary(prong, lam):
+def train_Adversary(prong, lam_exp):
     logger = logging.getLogger(__name__)
-    # lam_exp -= 2
-    # lam = 10 ** lam_exp
-    lam_exp = '{0:.03e}'.format(np.log10(lam))
+    lam = 10 ** lam_exp
     logger.info('Working on lambda={0:0.1e}'.format(lam))
     data = load_data_nn(prong)
     X_trainscaled = data[0]
@@ -164,51 +163,7 @@ def train_Adversary(prong, lam):
                                optimizer=Adam()
                                )
         AdversaryModel.summary()
-        # print(np.sum(y_train == 0), np.sum(y_train == 1))
-        # print(np.sum(y_val == 0), np.sum(y_val == 1))
-        #
-        # preds = AdversaryModel.predict([X_trainscaled, y_train], batch_size=1000000)
-        # preds, l_true = preds[:, :-1], preds[:, -1]
-        # print(l_true)
-        # cce = -np.sum(np.log(preds) * mbin_train_labels * (1 - l_true).reshape(-1, 1), axis=-1)
-        # # cce_b = cce * (1 - l_true)
-        # cce_sc = cce / np.sum(1 - l_true)
-        # print(preds)
-        # print(cce)
-        # # print(cce_b)
-        # print(np.sum(cce))
-        # print(cce_sc)
-        # print(np.mean(cce_sc[:32]))
-        # print(np.mean(cce_sc))
-        # print(len(X_trainscaled[::64]))
-        # print(len(X_trainscaled[::64]) * np.mean(cce_sc))
-        # print(AdversaryModel.evaluate(x=[X_trainscaled, y_train],
-        #                               y=mbin_train_labels,
-        #                               batch_size=32,
-        #                               verbose=0
-        #                               ))
-        # print('validation')
-        # preds = AdversaryModel.predict([X_valscaled, y_val], batch_size=1000000)
-        # preds, l_true = preds[:, :-1], preds[:, -1]
-        # print(l_true)
-        # cce = -np.sum(np.log(preds) * mbin_val_labels * (1 - l_true).reshape(-1, 1), axis=-1)
-        # # cce_b = cce * (1 - l_true)
-        # cce_sc = cce / np.sum(1 - l_true)
-        # print(preds)
-        # print(cce)
-        # # print(cce_b)
-        # print(np.sum(cce))
-        # print(cce_sc)
-        # print(np.mean(cce_sc[:32]))
-        # print(np.mean(cce_sc))
-        # print(len(X_trainscaled[::64]))
-        # print(len(X_trainscaled[::64]) * np.mean(cce_sc))
-        # print(AdversaryModel.evaluate(x=[X_valscaled, y_val],
-        #                               y=mbin_val_labels,
-        #                               batch_size=64,
-        #                               verbose=0
-        #                               ))
-        # sys.exit('Full break')
+
         AdversaryModel.fit(x=[X_trainscaled, y_train],
                            y=mbin_train_labels,
                            validation_data=[[X_valscaled, y_val],
@@ -303,8 +258,8 @@ def train_Adversary(prong, lam):
             with open('models/histories/adv_lam_{0}_{1}p.p'.format(lam_exp, prong),
                       'wb') as hf:
                 pickle.dump(losses, hf)
-            AdversaryModel.save_weights(mdir + 'Adv_lam_{0}_{1:03}_weigths_{2}p.h5'.format(lam_exp, i, prong))
-            ClassifierModel.save_weights(mdir + 'Class_lam_{0}_{1:03}_weights_{2}p.h5'.format(lam_exp, i, prong))
+            AdversaryModel.save_weights(mdir + 'Adv_lam_{0}_{1}_weigths_{2}p.h5'.format(lam_exp, i, prong))
+            ClassifierModel.save_weights(mdir + 'Class_lam_{0}_{1}_weights_{2}p.h5'.format(lam_exp, i, prong))
 
         indices = np.random.permutation(len(X_trainscaled))
 
@@ -355,7 +310,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format=log_fmt)
 
     # not used in this stub but often useful for finding various files
-    # project_dir = Path(__file__).resolve().parents[2]
+    project_dir = Path(__file__).resolve().parents[2]
 
     # find .env automagically by walking up directories until it's found, then
     # load up the .env entries as environment variables

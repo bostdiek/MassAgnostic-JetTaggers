@@ -1,18 +1,18 @@
 #!/bin/bash
-#SBATCH --job-name=2p    ### Job Name
+#SBATCH --job-name=4p    ### Job Name
 #SBATCH --partition=gpu       ### Quality of Service (like a queue in PBS)
 #SBATCH --time=0-18:00:00     ### Wall clock time limit in Days-HH:MM:SS
 #SBATCH --nodes=1             ### Node count required for the job
 #SBATCH --ntasks-per-node=7   ### Nuber of tasks to be launched per Node
 #SBATCH --gres=gpu:1          ### General REServation of gpu:number of gpus
 #SBATCH --mem=32G             ### Memory
-#SBATCH --array=2,5,20,50,200,500           ### Arrays for lambda
-#SBATCH --output=SlurmOuts/output_2p_%a.txt
-#SBATCH --error=SlurmErrors/error_2p_%a.txt
+#SBATCH --array=20,50,200,500           ### Arrays for lambda
+#SBATCH --output=SlurmOuts/output_4p_%a.txt
+#SBATCH --error=SlurmErrors/error_4p_%a.txt
 #SBATCH --mail-user=bostdiek@uoregon.edu ### email for alerts
 #SBATCH --mail-type=ALL
 
-PRONG=2
+PRONG=4
 
 module load cuda/9.0
 module load python3
