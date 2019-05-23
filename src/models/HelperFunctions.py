@@ -2,8 +2,10 @@
 import numpy as np
 import pandas as pd
 import pickle
-
-interim_datadir = 'data/interim/'
+from pathlib import Path
+project_dir = Path(__file__).resolve().parents[2]
+# print(project_dir.resolve())
+interim_datadir = str(project_dir.resolve()) + '/data/interim/'
 
 
 def load_data_bdt(prong, set='train'):
