@@ -16,7 +16,8 @@ import pickle
 from pathlib import Path
 import logging
 
-from HelperFunctions import load_data_bdt, write_roc_pickle, make_histos
+from HelperFunctions import load_data_bdt, load_test_data_nn
+from HelperFunctions import write_roc_pickle, make_histos
 
 
 def predict_uboost(prong):
@@ -83,6 +84,39 @@ def predict_gbc(prong):
     return histos
 
 
+def predict_base_nn(prong):
+    '''
+    Computes the predictions for the gradient boosted decision tree.
+    Inputs:
+        prong: interger denoting the number of prongs in the signal jets
+    Outputs:
+        sig_prob: [np array] probability of being selected for each event
+        fpr: [np array] false positive rate
+        tpr: [np array] true postive rate
+        threholds: [np array] cut values corresponding to the fpr and tpr
+        auc: [float] the area under the ROC curve
+    '''
+    X_testscaled, y_test, jet_mass = load_test_data_nn(prong)
+    y_test = np.ravel(y_test)
+    name = str(project_dir) + '/models/base_nn_{0}p.h5'.format(prong)
+
+    # load the model and make predictions
+    base_nn = load_model(name)
+    sig_prob = base_nn.predict(X_testscaled, verbose=False)
+    sig_prob = np.ravel(sig_prob)
+    assert sig_prob.shape == y_test.shape
+    # compute the test statistics
+    fpr, tpr, thresholds = roc_curve(y_true=y_test, y_score=sig_prob)
+    auc_score = auc(fpr, tpr)
+    roc_info = fpr, tpr, thresholds, auc_score
+    # save the info
+    model_name = 'base_nn_{0}p'.format(prong)
+    write_roc_pickle(model_name, roc_info)
+    histos = make_histos(model_name, jet_mass, sig_prob, y_test, roc_info)
+
+    return histos
+
+
 @click.command()
 @click.option('--prong', default=2, type=click.IntRange(2, 4),
               help='How many prongs in signal jets')
@@ -94,6 +128,9 @@ def main(prong):
 
     print('Making gradient boosted decision tree predictions')
     gbc_hist = predict_gbc(prong)
+
+    print('Making gradient base neural network')
+    bnn_hist = predict_base_nn(prong)
 
 
 if __name__ == '__main__':
