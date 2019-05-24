@@ -110,7 +110,7 @@ def write_roc_pickle(file_name, roc_info):
         file_name: give the model name and prong as a string
         roc_info: tuple correspond to (fpr, tpr, thresholds, auc)
     Outputs:
-        No outputs
+        Dictionary that was saved
     '''
     fpr, tpr, thresholds, auc = roc_info
     full_name = pred_datadir + file_name + '_roc.p'
@@ -124,6 +124,7 @@ def write_roc_pickle(file_name, roc_info):
 
     with open(full_name, 'wb') as f:
         pickle.dump(data, f)
+    return data
 
 
 def make_histos(model_name, jet_mass, predicted_probabilities, y_true, roc_info):
