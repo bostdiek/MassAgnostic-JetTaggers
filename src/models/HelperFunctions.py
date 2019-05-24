@@ -6,6 +6,7 @@ from pathlib import Path
 project_dir = Path(__file__).resolve().parents[2]
 # print(project_dir.resolve())
 interim_datadir = str(project_dir.resolve()) + '/data/interim/'
+pred_datadir = str(project_dir.resolve()) + '/data/modelpredictions/'
 
 
 def load_data_bdt(prong, set='train'):
@@ -99,3 +100,74 @@ def load_test_data_nn(prong):
     mass = np.load(interim_datadir + m_name)
 
     return X_testscaled, y_test, mass
+
+
+def write_roc_pickle(file_name, roc_info):
+    '''
+    Saves the ROC curve information to a pickle file
+    Inputs:
+        file_name: give the model name and prong as a string
+        roc_info: tuple correspond to (fpr, tpr, thresholds, auc)
+    Outputs:
+        No outputs
+    '''
+    fpr, tpr, thresholds, auc = roc_info
+    full_name = pred_datadir + file_name + '_roc.p'
+
+    # make the dictionary to be written
+    data = {'x_data': tpr,
+            'y_data': 1.0 / fpr,
+            'cut_values': thresholds,
+            'auc': auc
+            }
+
+    with open(full_name, 'wb') as f:
+        pickle.dump(data, f)
+
+
+def make_histos(model_name, jet_mass, predicted_probabilities, y_true, roc_info):
+    '''
+    Writes the files a pickle file for the jet mass of signal and background
+    events at different fixed signal efficiencies.
+
+    Inputs:
+        model_name: model name of the file to be written
+        predicted_probabilities: preictions of the model
+        y_tue: true labels that are trying to be predicted
+        roc_info: tupple of (fpr, tpr, thresholds, auc)
+    Outputs:
+        histo_dictionary: dictionary with efficiencies as keys.
+            2D tupple of
+                (np.array(signal masses passing),
+                 np.array(background masses passing)
+                )
+            for the value
+    '''
+    full_name = pred_datadir + model_name + '_histos.p'
+
+    fpr, tpr, thresholds, auc = roc_info
+
+    sig_mass = jet_mass[y_true == 1]
+    bkg_mass = jet_mass[y_true == 0]
+
+    sig_pred = predicted_probabilities[y_true == 1]
+    bkg_pred = predicted_probabilities[y_true == 0]
+
+    histo_dictionary = OrderedDict()
+    efficiencies = np.linspace(0.05, 1, 96)
+
+    for eff in efficiencies:
+        # get the index of the tpr closest to the signal efficiency requested
+        i = np.argmin(np.abs(tpr - eff))
+        fpr_i, tpr_i, thr_i = fpr[i], tpr[i], thresholds[i]
+        if eff == 1:
+            thr_i = -1
+        sig_mass_pass = sig_mass[sig_pred > thr_i]
+        bkg_mass_pass = bkg_mass[bkg_pred > thr_i]
+        histo_dictionary[eff] = (sig_mass_pass, bkg_mass_pass)
+
+    # write the file to disk
+    with open(full_name, 'wb') as f:
+        pickle.dump(histo_dictionary, f)
+
+    return histo_dictionary
