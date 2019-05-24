@@ -30,6 +30,15 @@ def train_planed_nn(prong):
     val_weights = data[4]
     class_weights = data[5]
 
+    # load the scaling weights
+    interim_datadir = str(project_dir.resolve()) + '/data/interim/'
+    tr_name = interim_datadir + 'train_planing_weights_{0}p.npy'.format(prong)
+    val_name = interim_datadir + 'val_planing_weights_{0}p.npy'.format(prong)
+    tr_planed_weights = np.load(tr_name).flatten()
+    val_planed_weights = np.load(val_name)
+    val_planed_weights *= np.array(val_weights)
+    val_planed_weights = val_planed_weights.flatten()
+
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, verbose=1,
                                   patience=5, min_lr=1.0e-6)
     es = EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='auto')
@@ -45,10 +54,12 @@ def train_planed_nn(prong):
     ClassifierModel.summary()
     history = ClassifierModel.fit(X_trainscaled,
                                   y_train,
-                                  validation_data=[X_valscaled, y_val, val_weights],
+                                  validation_data=[X_valscaled, y_val,
+                                                   val_planed_weights],
                                   epochs=100,
                                   class_weight=class_weights,
-                                  callbacks=[reduce_lr, es]
+                                  callbacks=[reduce_lr, es],
+                                  sample_weight=tr_planed_weights
                                   )
     ClassifierModel.save('models/planed_nn_{0}p.h5'.format(prong))
 

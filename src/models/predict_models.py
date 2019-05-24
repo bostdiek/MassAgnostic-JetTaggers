@@ -117,6 +117,39 @@ def predict_base_nn(prong):
     return histos, roc_curve_out
 
 
+def predict_planed_nn(prong):
+    '''
+    Computes the predictions for the neural network trained on planed data.
+    Inputs:
+        prong: interger denoting the number of prongs in the signal jets
+    Outputs:
+        sig_prob: [np array] probability of being selected for each event
+        fpr: [np array] false positive rate
+        tpr: [np array] true postive rate
+        threholds: [np array] cut values corresponding to the fpr and tpr
+        auc: [float] the area under the ROC curve
+    '''
+    X_testscaled, y_test, jet_mass = load_test_data_nn(prong)
+    y_test = np.ravel(y_test)
+    name = str(project_dir) + '/models/planed_nn_{0}p.h5'.format(prong)
+
+    # load the model and make predictions
+    base_nn = load_model(name)
+    sig_prob = base_nn.predict(X_testscaled, verbose=False)
+    sig_prob = np.ravel(sig_prob)
+    assert sig_prob.shape == y_test.shape
+    # compute the test statistics
+    fpr, tpr, thresholds = roc_curve(y_true=y_test, y_score=sig_prob)
+    auc_score = auc(fpr, tpr)
+    roc_info = fpr, tpr, thresholds, auc_score
+    # save the info
+    model_name = 'planed_nn_{0}p'.format(prong)
+    roc_curve_out = write_roc_pickle(model_name, roc_info)
+    histos = make_histos(model_name, jet_mass, sig_prob, y_test, roc_info)
+
+    return histos, roc_curve_out
+
+
 def predict_ann(prong, lam_exp):
     '''
     Computes the predictions for the adversarial neural network.
@@ -176,10 +209,16 @@ def main(prong):
     HistDictionary['GradientBoostingClassifier'] = gbc_hist
     ROCDictionary['GradientBoostingClassifier'] = gbc_roc
 
-    print('Making gradient base neural network')
+    print('Making base neural network')
     bnn_hist, bnn_roc = predict_base_nn(prong)
     HistDictionary['BaseNeuralNetwork'] = bnn_hist
     ROCDictionary['BaseNeuralNetwork'] = bnn_roc
+
+    print('Making planed neural network')
+    pnn_hist, pnn_roc = predict_base_nn(prong)
+    HistDictionary['PlanedNeuralNetwork'] = pnn_hist
+    ROCDictionary['PlanedNeuralNetwork'] = pnn_roc
+    print(pnn_roc)
 
     lam_exp_list = ['0', '3.010e-01', '6.990e-01',
                     '1', '1.301e+00', '1.699e+00',

@@ -52,6 +52,12 @@ base_nn: data
 	$(PYTHON_INTERPRETER) src/models/train_base_nn.py --prong=3
 	$(PYTHON_INTERPRETER) src/models/train_base_nn.py --prong=4
 
+## Train networks on Planed data
+planed_nn: data
+	$(PYTHON_INTERPRETER) src/models/train_planed_nn.py --prong=2
+	$(PYTHON_INTERPRETER) src/models/train_planed_nn.py --prong=3
+	$(PYTHON_INTERPRETER) src/models/train_planed_nn.py --prong=4
+
 ## Train uBoost classifiers
 uBoost: data
 	$(PYTHON_INTERPRETER) src/models/train_uBoost.py --prong=2
