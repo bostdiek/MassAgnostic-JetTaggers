@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import OrderedDict
 import numpy as np
 import pandas as pd
 import pickle
@@ -115,9 +116,9 @@ def write_roc_pickle(file_name, roc_info):
     full_name = pred_datadir + file_name + '_roc.p'
 
     # make the dictionary to be written
-    data = {'x_data': tpr,
-            'y_data': 1.0 / fpr,
-            'cut_values': thresholds,
+    data = {'x_data': tpr[fpr > 0],
+            'y_data': 1.0 / fpr[fpr > 0],
+            'cut_values': thresholds[fpr > 0],
             'auc': auc
             }
 
@@ -147,11 +148,11 @@ def make_histos(model_name, jet_mass, predicted_probabilities, y_true, roc_info)
 
     fpr, tpr, thresholds, auc = roc_info
 
-    sig_mass = jet_mass[y_true == 1]
-    bkg_mass = jet_mass[y_true == 0]
+    sig_mass = jet_mass[np.ravel(y_true == 1)]
+    bkg_mass = jet_mass[np.ravel(y_true == 0)]
 
-    sig_pred = predicted_probabilities[y_true == 1]
-    bkg_pred = predicted_probabilities[y_true == 0]
+    sig_pred = predicted_probabilities[np.ravel(y_true == 1)]
+    bkg_pred = predicted_probabilities[np.ravel(y_true == 0)]
 
     histo_dictionary = OrderedDict()
     efficiencies = np.linspace(0.05, 1, 96)
