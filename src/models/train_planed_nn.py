@@ -27,7 +27,7 @@ def train_planed_nn(prong):
     y_train = data[1]
     X_valscaled = data[2]
     y_val = data[3]
-    val_weights = data[4]
+    val_class_weights = data[4]
     class_weights = data[5]
 
     # load the scaling weights
@@ -35,13 +35,20 @@ def train_planed_nn(prong):
     tr_name = interim_datadir + 'train_planing_weights_{0}p.npy'.format(prong)
     val_name = interim_datadir + 'val_planing_weights_{0}p.npy'.format(prong)
     tr_planed_weights = np.load(tr_name).flatten()
-    val_planed_weights = np.load(val_name)
-    val_planed_weights *= np.array(val_weights)
-    val_planed_weights = val_planed_weights.flatten()
+    val_planed_weights = np.load(val_name).flatten()
+
+    #  tr_class_weights data
+    tr_class_weights = np.ones_like(y_train)
+    tr_class_weights[y_train == 0] = class_weights[0]
+    tr_class_weights[y_train == 1] = class_weights[1]
+    tr_class_weights = tr_class_weights.flatten()
+
+    tr_weights = tr_class_weights * tr_planed_weights
+    val_weights = val_class_weights * val_planed_weights
 
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, verbose=1,
                                   patience=5, min_lr=1.0e-6)
-    es = EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='auto')
+    es = EarlyStopping(monitor='val_loss', patience=20, verbose=0, mode='auto')
 
     inputs = Input(shape=(X_trainscaled.shape[1], ))
     Classifier = Dense(50, activation='relu')(inputs)
@@ -57,7 +64,7 @@ def train_planed_nn(prong):
                                   validation_data=[X_valscaled, y_val,
                                                    val_planed_weights],
                                   epochs=100,
-                                  class_weight=class_weights,
+                                  # class_weight=class_weights,
                                   callbacks=[reduce_lr, es],
                                   sample_weight=tr_planed_weights
                                   )
