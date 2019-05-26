@@ -8,7 +8,6 @@ import numpy as np
 import numpy.random as ra
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from numpy.linalg import svd
 
 
 class PCA_scaler_withRotations:
@@ -45,15 +44,14 @@ class PCA_scaler_withRotations:
         self.mypca = []
         tmp_data_pca = np.zeros_like(data)
         for i in range(bins):
-            K = tmp_data_pca.T.dot(tmp_data) / tmp_data.shape[0]  # covariance matrix
-            u, s, v = svd(K)  # u, s, v decomposition
-            self.mypca.append(u)
-            tmp_data_pca[bin_inds == i] = tmp_data[bin_inds == i].dot(u)
+            tmp_pca = PCA().fit(tmp_data)
+            self.mypca.append(tmp_pca)
+            tmp_data_pca[bin_inds == i] = tmp_pca.transform(tmp_data[bin_inds == i])
 
         # finally, perform one last scaling of the now PCA rotated data
         self.final_scale = []
         for i in range(bins):
-            scaler = StandardScaler().fit(data[bin_inds == i])
+            scaler = StandardScaler().fit(tmp_data_pca[bin_inds == i])
             self.final_scale.append(scaler)
 
     def transform(self, jet_mass, data):
@@ -73,9 +71,9 @@ class PCA_scaler_withRotations:
             final_scaler = self.final_scale[i]
 
             tmp_data = initial_scaler.transform(tmp_data)  # scale
-            tmp_data = tmp_data.dot(pca_u)  # rotate
-            tmp_data = final_scaler.transform(tmp_data)  # scalle
-            tmp_data = tmp_data.dot(pca_u.T)  # rotate back
+            tmp_data = pca_u.transform(tmp_data)  # rotate
+            tmp_data = final_scaler.transform(tmp_data)  # scale
+            tmp_data = pca_u.inverse_transform(tmp_data)  # rotate back
 
             scaled[bin_inds == i] = tmp_data
         return scaled
