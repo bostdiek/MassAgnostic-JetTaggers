@@ -216,6 +216,7 @@ def make_histos(model_name, jet_mass, predicted_probabilities, y_true, roc_info)
     efficiencies = np.linspace(0.05, 1, 96)
 
     for eff in efficiencies:
+        eff = np.round(eff, decimals=2)
         # get the index of the tpr closest to the signal efficiency requested
         i = np.argmin(np.abs(tpr - eff))
         fpr_i, tpr_i, thr_i = fpr[i], tpr[i], thresholds[i]
