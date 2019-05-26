@@ -18,6 +18,7 @@ import logging
 
 from HelperFunctions import load_data_bdt, load_test_data_nn
 from HelperFunctions import write_roc_pickle, make_histos
+from HelperFunctions import load_test_data_PCA_nn
 
 
 def predict_uboost(prong):
@@ -190,6 +191,39 @@ def predict_ann(prong, lam_exp):
     return histos, roc_curve_out
 
 
+def predict_PCA_nn(prong):
+    '''
+    Computes the predictions for the base neural network.
+    Inputs:
+        prong: interger denoting the number of prongs in the signal jets
+    Outputs:
+        sig_prob: [np array] probability of being selected for each event
+        fpr: [np array] false positive rate
+        tpr: [np array] true postive rate
+        threholds: [np array] cut values corresponding to the fpr and tpr
+        auc: [float] the area under the ROC curve
+    '''
+    X_testscaled, y_test, jet_mass = load_test_data_PCA_nn(prong)
+    y_test = np.ravel(y_test)
+    name = str(project_dir) + '/models/pca_nn_{0}p.h5'.format(prong)
+
+    # load the model and make predictions
+    base_nn = load_model(name)
+    sig_prob = base_nn.predict(X_testscaled, verbose=False)
+    sig_prob = np.ravel(sig_prob)
+    assert sig_prob.shape == y_test.shape
+    # compute the test statistics
+    fpr, tpr, thresholds = roc_curve(y_true=y_test, y_score=sig_prob)
+    auc_score = auc(fpr, tpr)
+    roc_info = fpr, tpr, thresholds, auc_score
+    # save the info
+    model_name = 'base_nn_{0}p'.format(prong)
+    roc_curve_out = write_roc_pickle(model_name, roc_info)
+    histos = make_histos(model_name, jet_mass, sig_prob, y_test, roc_info)
+
+    return histos, roc_curve_out
+
+
 @click.command()
 @click.option('--prong', default=2, type=click.IntRange(2, 4),
               help='How many prongs in signal jets')
@@ -213,6 +247,11 @@ def main(prong):
     bnn_hist, bnn_roc = predict_base_nn(prong)
     HistDictionary['BaseNeuralNetwork'] = bnn_hist
     ROCDictionary['BaseNeuralNetwork'] = bnn_roc
+
+    print('Making PCA neural network')
+    bnn_hist, bnn_roc = predict_PCA_nn(prong)
+    HistDictionary['PCANeuralNetwork'] = bnn_hist
+    ROCDictionary['PCANeuralNetwork'] = bnn_roc
 
     print('Making planed neural network')
     pnn_hist, pnn_roc = predict_base_nn(prong)

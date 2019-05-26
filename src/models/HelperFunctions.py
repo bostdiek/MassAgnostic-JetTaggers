@@ -139,6 +139,27 @@ def load_test_data_nn(prong):
     return X_testscaled, y_test, mass
 
 
+def load_test_data_PCA_nn(prong):
+    '''
+    Input:
+        prong: interger denoting the number of prongs in the signal jets
+    Outputs:
+        X_testscaled: numpy array of test data scaled and centered
+        y_test: test labels
+        mass: numpy array for the jet masses
+    '''
+    test_x_name = 'test_X_PCA_{0}p.npy'.format(prong)
+    X_testscaled = np.load(interim_datadir + test_x_name)
+
+    y_test_name = 'test_Y_{0}p.npy'.format(prong)
+    y_test = np.load(interim_datadir + y_test_name)
+
+    m_name = 'test_jetmass_{0}p.npy'.format(prong)
+    mass = np.load(interim_datadir + m_name)
+
+    return X_testscaled, y_test, mass
+
+
 def write_roc_pickle(file_name, roc_info):
     '''
     Saves the ROC curve information to a pickle file

@@ -76,6 +76,12 @@ GBC: data
 	$(PYTHON_INTERPRETER) src/models/train_AdaBoost.py --prong=3
 	$(PYTHON_INTERPRETER) src/models/train_AdaBoost.py --prong=4
 
+## Make the histograms from the predictions
+predictions: data
+	$(PYTHON_INTERPRETER) src/models/predict_models.py --prong=2
+	$(PYTHON_INTERPRETER) src/models/predict_models.py --prong=3
+	$(PYTHON_INTERPRETER) src/models/predict_models.py --prong=4
+
 ## Delete all compiled Python files
 clean:
 	find . -type f -name "*.py[co]" -delete
