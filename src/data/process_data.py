@@ -195,7 +195,7 @@ def DoPCA(prong):
 
     MyPCA = PCA_scaler_withRotations(jet_mass=bkg_mass_train,
                                      data=bkg_data_train,
-                                     bins=50,
+                                     bins=100,
                                      minmass=50,
                                      maxmass=400)
     PCA_train = MyPCA.transform(jet_mass=mass_train, data=X_train)
