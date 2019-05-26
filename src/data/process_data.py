@@ -9,6 +9,7 @@ import os
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
+from PCA_scaler import PCA_scaler_withRotations
 import logging
 import pickle
 
@@ -157,6 +158,53 @@ def process_data(prong):
     np.save('data/interim/val_Y_{0}p.npy'.format(prong),
             y_val
             )
+
+
+def DoPCA(prong):
+    SignalDF, BackgroundDF = load_data(prong)
+    TrainingColumns = SignalDF.columns
+
+    SignalDF['Label'] = 1
+    BackgroundDF['Label'] = 0
+
+    CombinedData = np.vstack([SignalDF[TrainingColumns].values,
+                              BackgroundDF[TrainingColumns].values
+                              ]
+                             )
+    CombinedLabels = np.hstack([SignalDF['Label'].values,
+                                BackgroundDF['Label'].values
+                                ]
+                               ).reshape(CombinedData.shape[0], 1)
+    TrainingIndices = np.load('data/interim/TrainingIndices_{0}p.npy'.format(prong))
+    ValIndices = np.load('data/interim/ValidationIndices_{0}p.npy'.format(prong))
+    TestIndices = np.load('data/interim/TestIndices_{0}p.npy'.format(prong))
+
+    X_train, y_train = CombinedData[TrainingIndices], CombinedLabels[TrainingIndices]
+    X_test, y_test = CombinedData[TestIndices], CombinedLabels[TestIndices]
+    X_val, y_val = CombinedData[ValIndices], CombinedLabels[ValIndices]
+
+    mass_train = X_train[:, 0]
+    mass_test = X_test[:, 0]
+    mass_val = X_val[:, 0]
+    X_train = X_train[:, 1:]
+    X_test = X_test[:, 1:]
+    X_val = X_val[:, 1:]
+
+    bkg_data_train = X_train[np.ravel(y_train) == 0]
+    bkg_mass_train = mass_train[np.ravel(y_train) == 0]
+
+    MyPCA = PCA_scaler_withRotations(jet_mass=bkg_mass_train,
+                                     data=bkg_data_train,
+                                     bins=50,
+                                     minmass=50,
+                                     maxmass=400)
+    PCA_train = MyPCA.transform(jet_mass=mass_train, data=X_train)
+    PCA_val = MyPCA.transform(jet_mass=mass_val, data=X_val)
+    PCA_test = MyPCA.transform(jet_mass=mass_test, data=X_test)
+
+    np.save('data/interim/train_X_PCA_{0}p.npy'.format(prong), PCA_train)
+    np.save('data/interim/test_X_PCA_{0}p.npy'.format(prong), PCA_test)
+    np.save('data/interim/val_X_PCA_{0}p.npy'.format(prong), PCA_val)
 
 
 if __name__ == '__main__':

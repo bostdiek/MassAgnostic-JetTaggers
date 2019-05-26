@@ -6,6 +6,7 @@ from pathlib import Path
 from subprocess import call
 from process_data import process_data
 from get_weights_1d import set_weights
+from process_data import DoPCA
 
 project_dir = Path(__file__).resolve().parents[2]
 
@@ -73,6 +74,22 @@ def GetPlaningWeights():
             logger.info('finished processing {0} prong data'.format(prong))
 
 
+def PCA():
+    basedr = 'data/interim/'
+    logger = logging.getLogger(__name__)
+    for prong in range(2, 5):
+        train_scaled = 'train_X_PCA_{0}p.npy'.format(prong)
+        p_name = project_dir.joinpath(basedr + train_scaled)
+        name_str = p_name.resolve()
+
+        if p_name.exists():
+            logger.info('The PCA scaling for {0} have already been done'.format(name_str))
+        else:
+            logger.info('computing PCA {0} prong data'.format(prong))
+            DoPCA(prong)
+            logger.info('finished processing {0} prong data'.format(prong))
+
+
 def main():
     """ Runs data processing scripts to turn raw data from (../raw) into
         cleaned data ready to be analyzed (saved in ../processed).
@@ -84,6 +101,8 @@ def main():
     SplitAndScale()
     logger.info('planing the mass')
     GetPlaningWeights()
+    logger.info('Do the PCA rotations')
+    PCA()
 
 
 if __name__ == '__main__':
