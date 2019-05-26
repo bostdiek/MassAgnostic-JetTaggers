@@ -135,8 +135,8 @@ def predict_planed_nn(prong):
     name = str(project_dir) + '/models/planed_nn_{0}p.h5'.format(prong)
 
     # load the model and make predictions
-    base_nn = load_model(name)
-    sig_prob = base_nn.predict(X_testscaled, verbose=False)
+    planed_nn = load_model(name)
+    sig_prob = planed_nn.predict(X_testscaled, verbose=False)
     sig_prob = np.ravel(sig_prob)
     assert sig_prob.shape == y_test.shape
     # compute the test statistics
@@ -170,8 +170,8 @@ def predict_ann(prong, lam_exp):
     name += '_final_{0}p.h5'.format(prong)
 
     # load the model and make predictions
-    base_nn = load_model(name)
-    sig_prob = base_nn.predict(X_testscaled, verbose=False)
+    model = load_model(name)
+    sig_prob = model.predict(X_testscaled, verbose=False)
     sig_prob = np.ravel(sig_prob)
     assert sig_prob.shape == y_test.shape
 
@@ -208,8 +208,8 @@ def predict_PCA_nn(prong):
     name = str(project_dir) + '/models/pca_nn_{0}p.h5'.format(prong)
 
     # load the model and make predictions
-    base_nn = load_model(name)
-    sig_prob = base_nn.predict(X_testscaled, verbose=False)
+    model = load_model(name)
+    sig_prob = model.predict(X_testscaled, verbose=False)
     sig_prob = np.ravel(sig_prob)
     assert sig_prob.shape == y_test.shape
     # compute the test statistics
@@ -217,7 +217,7 @@ def predict_PCA_nn(prong):
     auc_score = auc(fpr, tpr)
     roc_info = fpr, tpr, thresholds, auc_score
     # save the info
-    model_name = 'base_nn_{0}p'.format(prong)
+    model_name = 'pca_nn_{0}p'.format(prong)
     roc_curve_out = write_roc_pickle(model_name, roc_info)
     histos = make_histos(model_name, jet_mass, sig_prob, y_test, roc_info)
 
@@ -254,7 +254,7 @@ def main(prong):
     ROCDictionary['PCANeuralNetwork'] = bnn_roc
 
     print('Making planed neural network')
-    pnn_hist, pnn_roc = predict_base_nn(prong)
+    pnn_hist, pnn_roc = predict_planed_nn(prong)
     HistDictionary['PlanedNeuralNetwork'] = pnn_hist
     ROCDictionary['PlanedNeuralNetwork'] = pnn_roc
     print(pnn_roc)
