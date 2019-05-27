@@ -118,7 +118,7 @@ def process_data(prong):
     with open('data/interim/class_weights_{0}p.p'.format(prong), 'wb') as cf:
         pickle.dump(class_weights, cf)
 
-    val_weights = np.ones_like(y_val)
+    val_weights = np.ones_like(y_val, dtype='float')
     val_weights[y_val == 0] = class_weights[0]
     val_weights[y_val == 1] = class_weights[1]
     val_weights = val_weights.flatten()
@@ -126,7 +126,7 @@ def process_data(prong):
             val_weights
             )
 
-    tr_weights = np.ones_like(y_train)
+    tr_weights = np.ones_like(y_train, dtype='float')
     tr_weights[y_train == 0] = class_weights[0]
     tr_weights[y_train == 1] = class_weights[1]
     tr_weights = tr_weights.flatten()
