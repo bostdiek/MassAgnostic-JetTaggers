@@ -38,7 +38,7 @@ def train_planed_nn(prong):
     val_planed_weights = np.load(val_name).flatten()
 
     #  tr_class_weights data
-    tr_class_weights = np.ones_like(y_train)
+    tr_class_weights = np.ones_like(y_train, dtype='float')
     tr_class_weights[y_train == 0] = class_weights[0]
     tr_class_weights[y_train == 1] = class_weights[1]
     tr_class_weights = tr_class_weights.flatten()
