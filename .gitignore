@@ -79,6 +79,7 @@ target/
 /data/
 /SlurmErrors/
 /SlurmOuts/
+/FromLayne/
 
 # Mac OS-specific storage files
 .DS_Store
