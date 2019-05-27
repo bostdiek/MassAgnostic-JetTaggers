@@ -31,16 +31,10 @@ def train_PCA_NN(prong):
     class_weights = data[5]
 
     #  tr_class_weights data
-    tr_class_weights = np.ones_like(y_train)
+    tr_class_weights = np.ones_like(y_train, dtype='float')
     tr_class_weights[y_train == 0] = class_weights[0]
     tr_class_weights[y_train == 1] = class_weights[1]
     tr_class_weights = tr_class_weights.flatten()
-
-    #  tr_class_weights data
-    val_class_weights = np.ones_like(y_val)
-    val_class_weights[y_val == 0] = class_weights[0]
-    val_class_weights[y_val == 1] = class_weights[1]
-    val_class_weights = val_class_weights.flatten()
 
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, verbose=1,
                                   patience=5, min_lr=1.0e-6)
@@ -57,7 +51,7 @@ def train_PCA_NN(prong):
     ClassifierModel.summary()
     history = ClassifierModel.fit(X_trainscaled,
                                   y_train,
-                                  validation_data=[X_valscaled, y_val, val_class_weights],
+                                  validation_data=[X_valscaled, y_val, val_weights],
                                   epochs=100,
                                   callbacks=[reduce_lr, es],
                                   sample_weight=tr_class_weights

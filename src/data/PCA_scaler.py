@@ -73,7 +73,8 @@ class PCA_scaler_withRotations:
             tmp_data = initial_scaler.transform(tmp_data)  # scale
             tmp_data = pca_u.transform(tmp_data)  # rotate
             tmp_data = final_scaler.transform(tmp_data)  # scale
-            tmp_data = pca_u.inverse_transform(tmp_data)  # rotate back
+            np.dot(tmp_data, pca_u.components_)
+            # tmp_data = pca_u.inverse_transform(tmp_data)  # rotate back
 
             scaled[bin_inds == i] = tmp_data
         return scaled
