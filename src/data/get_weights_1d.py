@@ -94,13 +94,13 @@ def set_weights(prong):
     sig_probs = get_probs_1d(x=sig_mass,
                              min_val=min_mass,
                              max_val=max_mass,
-                             bins=500)
+                             bins=100)
 
     back_mass = m_train[np.ravel(y_train == 0)]
     back_probs = get_probs_1d(x=back_mass,
                               min_val=min_mass,
                               max_val=max_mass,
-                              bins=500)
+                              bins=100)
 
     # new array for the output weights
     train_weights = np.zeros_like(m_train)
