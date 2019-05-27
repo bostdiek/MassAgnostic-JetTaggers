@@ -129,7 +129,7 @@ def set_weights(prong):
             test_weights
             )
 
-    #  test data
+    #  validation data
     valweights = np.zeros_like(m_val)
     sigs = np.ravel(y_val == 1)
     backs = np.ravel(y_val == 0)
