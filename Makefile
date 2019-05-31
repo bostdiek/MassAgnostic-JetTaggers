@@ -72,9 +72,9 @@ uBoost: data
 
 ## Train Gradient Boosting Classifiers
 GBC: data
-	$(PYTHON_INTERPRETER) src/models/train_AdaBoost.py --prong=2
-	$(PYTHON_INTERPRETER) src/models/train_AdaBoost.py --prong=3
-	$(PYTHON_INTERPRETER) src/models/train_AdaBoost.py --prong=4
+	$(PYTHON_INTERPRETER) src/models/train_GBC.py.py --prong=2
+	$(PYTHON_INTERPRETER) src/models/train_GBC.py.py --prong=3
+	$(PYTHON_INTERPRETER) src/models/train_GBC.py.py --prong=4
 
 ## Make the histograms from the predictions
 predictions: data
