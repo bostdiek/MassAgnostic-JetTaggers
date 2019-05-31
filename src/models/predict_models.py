@@ -15,6 +15,7 @@ from sklearn.metrics import roc_curve, auc
 import pickle
 from pathlib import Path
 import logging
+import sys
 
 from HelperFunctions import load_data_bdt, load_test_data_nn
 from HelperFunctions import write_roc_pickle, make_histos
@@ -53,11 +54,13 @@ def predict_uboost(prong):
     return histos, roc_curve_out
 
 
-def predict_gbc(prong):
+def predict_gbc(prong, data='base'):
     '''
     Computes the predictions for the gradient boosted decision tree.
     Inputs:
         prong: interger denoting the number of prongs in the signal jets
+        data: options are 'base', 'planed', 'pca' indicating which dataset
+            the gbc was trained on
     Outputs:
         sig_prob: [np array] probability of being selected for each event
         fpr: [np array] false positive rate
@@ -65,9 +68,21 @@ def predict_gbc(prong):
         threholds: [np array] cut values corresponding to the fpr and tpr
         auc: [float] the area under the ROC curve
     '''
+    if data == 'base':
+        prefix = ''
+    elif data == 'planed':
+        prefix = 'planed'
+    elif data == 'pca':
+        prefix = 'pca'
+    else:
+        sys.exit('Bad entry for data type')
+
     testdf, y_test, data_cols = load_data_bdt(prong, set='test')
     jet_mass = testdf[data_cols[0]].values
-    name = str(project_dir) + '/models/GBC_{0}p.p'.format(prong)
+    if prefix == '':
+        name = str(project_dir) + '/models/GBC_{0}p.p'.format(prong)
+    else:
+        name = str(project_dir) + '/models/{0}_gbc_{1}p.p'.format(prefix, prong)
 
     # load the model and make predictions
     gbc = joblib.load(name)
@@ -78,7 +93,10 @@ def predict_gbc(prong):
     auc_u = auc(fpr_u, tpr_u)
     roc_info = fpr_u, tpr_u, thresholds_u, auc_u
     # save the info
-    model_name = 'GBC_{0}p'.format(prong)
+    if prefix == '':
+        model_name = 'GBC_{0}p'.format(prong)
+    else:
+        model_name = '{0}_GBC_{1}p'.format(prefix, prong)
     roc_curve_out = write_roc_pickle(model_name, roc_info)
     histos = make_histos(model_name, jet_mass, sig_prob, y_test, roc_info)
 
@@ -233,13 +251,8 @@ def main(prong):
     HistDictionary = {}
     ROCDictionary = {}
 
-    print('Making uboost predictions')
-    uboost_hist, uboost_roc = predict_uboost(prong)
-    HistDictionary['uBoost'] = uboost_hist
-    ROCDictionary['uBoost'] = uboost_roc
-
     print('Making gradient boosted decision tree predictions')
-    gbc_hist, gbc_roc = predict_gbc(prong)
+    gbc_hist, gbc_roc = predict_gbc(prong, data='base')
     HistDictionary['GradientBoostingClassifier'] = gbc_hist
     ROCDictionary['GradientBoostingClassifier'] = gbc_roc
 
@@ -248,30 +261,39 @@ def main(prong):
     HistDictionary['BaseNeuralNetwork'] = bnn_hist
     ROCDictionary['BaseNeuralNetwork'] = bnn_roc
 
+    print('Making planed neural network')
+    pnn_hist, pnn_roc = predict_planed_nn(prong)
+    HistDictionary['PlanedNeuralNetwork'] = pnn_hist
+    ROCDictionary['PlanedNeuralNetwork'] = pnn_roc
+
+    print('Making planed GBC')
+    pgbc_hist, pgbc_roc = predict_gbc(prong, data='planed')
+    HistDictionary['PlanedGBC'] = pgbc_hist
+    ROCDictionary['PlanedGBC'] = pgbc_roc
+
     print('Making PCA neural network')
     bnn_hist, bnn_roc = predict_PCA_nn(prong)
     HistDictionary['PCANeuralNetwork'] = bnn_hist
     ROCDictionary['PCANeuralNetwork'] = bnn_roc
 
-    print('Making planed neural network')
-    pnn_hist, pnn_roc = predict_planed_nn(prong)
-    HistDictionary['PlanedNeuralNetwork'] = pnn_hist
-    ROCDictionary['PlanedNeuralNetwork'] = pnn_roc
-    print(pnn_roc)
-
     lam_exp_list = ['0', '3.010e-01', '6.990e-01',
                     '1', '1.301e+00', '1.699e+00',
                     '2', '2.301e+00', '2.699e+00', '3']
 
-    for le in lam_exp_list:
-        lam = 10**float(le)
-        if lam > 0:
-            lam = round(lam)
-        print('Making adversarial predictions for lambda={0:03d}'.format(lam))
-        model_name = 'AdversaryLambda_{0:03d}'.format(lam)
-        ann_hist, ann_roc = predict_ann(prong, le)
-        HistDictionary[model_name] = ann_hist
-        ROCDictionary[model_name] = ann_roc
+    # for le in lam_exp_list:
+    #     lam = 10**float(le)
+    #     if lam > 0:
+    #         lam = round(lam)
+    #     print('Making adversarial predictions for lambda={0:03d}'.format(lam))
+    #     model_name = 'AdversaryLambda_{0:03d}'.format(lam)
+    #     ann_hist, ann_roc = predict_ann(prong, le)
+    #     HistDictionary[model_name] = ann_hist
+    #     ROCDictionary[model_name] = ann_roc
+
+    print('Making uboost predictions')
+    uboost_hist, uboost_roc = predict_uboost(prong)
+    HistDictionary['uBoost'] = uboost_hist
+    ROCDictionary['uBoost'] = uboost_roc
 
     pred_datadir = str(project_dir.resolve()) + '/data/modelpredictions/'
     with open(pred_datadir + 'Histograms_{0}p.p'.format(prong), 'wb') as f:
