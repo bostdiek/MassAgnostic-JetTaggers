@@ -276,6 +276,11 @@ def main(prong):
     HistDictionary['PCANeuralNetwork'] = bnn_hist
     ROCDictionary['PCANeuralNetwork'] = bnn_roc
 
+    print('Making PCA GBC')
+    pcagbc_hist, pcagbc_roc = predict_gbc(prong, data='pca')
+    HistDictionary['PCAGBC'] = pcagbc_hist
+    ROCDictionary['PCAGBC'] = pcagbc_roc
+
     lam_exp_list = ['0', '3.010e-01', '6.990e-01',
                     '1', '1.301e+00', '1.699e+00',
                     '2', '2.301e+00', '2.699e+00', '3']

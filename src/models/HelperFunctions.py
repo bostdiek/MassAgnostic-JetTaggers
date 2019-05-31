@@ -10,7 +10,7 @@ interim_datadir = str(project_dir.resolve()) + '/data/interim/'
 pred_datadir = str(project_dir.resolve()) + '/data/modelpredictions/'
 
 
-def load_data_bdt(prong, set='train'):
+def load_data_bdt(prong, set='train', scale='normal'):
     '''
     Input:
         prong: interger denoting the number of prongs in the signal jets
@@ -28,7 +28,10 @@ def load_data_bdt(prong, set='train'):
                  ]
 
     #  Training data
-    x_name = set + '_scaled_X_{0}p.npy'.format(prong)
+    if scale == 'normal':
+        x_name = set + '_scaled_X_{0}p.npy'.format(prong)
+    elif scale == 'pca':
+        x_name = set + '_X_PCA_{0}p.npy'.format(prong)
     X_scaled = np.load(interim_datadir + x_name)
 
     y_name = set + '_Y_{0}p.npy'.format(prong)

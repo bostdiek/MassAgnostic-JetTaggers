@@ -58,11 +58,23 @@ planed_nn: data
 	$(PYTHON_INTERPRETER) src/models/train_planed_nn.py --prong=3
 	$(PYTHON_INTERPRETER) src/models/train_planed_nn.py --prong=4
 
+## Train BDT on Planed data
+planed_gbc: data
+	$(PYTHON_INTERPRETER) src/models/train_planed_GBC.py --prong=2
+	$(PYTHON_INTERPRETER) src/models/train_planed_GBC.py --prong=3
+	$(PYTHON_INTERPRETER) src/models/train_planed_GBC.py --prong=4
+
 ## Train networks on PCA scaled data
 pca_nn: data
 	$(PYTHON_INTERPRETER) src/models/train_PCA_nn.py --prong=2
 	$(PYTHON_INTERPRETER) src/models/train_PCA_nn.py --prong=3
 	$(PYTHON_INTERPRETER) src/models/train_PCA_nn.py --prong=4
+
+## Train BDT on PCA data
+pca_gbc: data
+	$(PYTHON_INTERPRETER) src/models/train_PCA_GBC.py --prong=2
+	$(PYTHON_INTERPRETER) src/models/train_PCA_GBC.py --prong=3
+	$(PYTHON_INTERPRETER) src/models/train_PCA_GBC.py --prong=4
 
 ## Train uBoost classifiers
 uBoost: data
