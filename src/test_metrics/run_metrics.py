@@ -16,8 +16,8 @@ from Distances import BhatDist, JS_Distance
 from q0_histogram import get_q0_hist
 
 
-HistConditions = {2: [10000, 100, 35],
-                  3: [10000, 100, 35],
+HistConditions = {2: [10000, 100, 15],
+                  3: [10000, 100, 15],
                   4: [10000, 100, 10]
                   }
 
@@ -40,6 +40,7 @@ def run_metrics(prong):
         sig_start, back_start = AllHists[model][1.0]
         SigWeight = N_SIG_O / len(sig_start)
         BackWeight = N_BACK_O / len(back_start)
+        print(SigWeight, BackWeight)
 
         back_hist0, bins = np.histogram(back_start,
                                         range=(50, 400),
@@ -60,33 +61,41 @@ def run_metrics(prong):
             sig, back = AllHists[model][eff]
             sig_h, _ = np.histogram(sig,
                                     bins=bins,
-                                    weights=np.ones_like(sig) * SigWeight
+                                    weights=np.ones_like(sig, dtype='float') * SigWeight
                                     )
             back_h, _ = np.histogram(back,
                                      bins=bins,
-                                     weights=np.ones_like(back) * BackWeight
+                                     weights=np.ones_like(back, dtype='float') * BackWeight
                                      )
+            # print(eff)
+            # print(sig_h, back_h)
             BD = BhatDist(back_hist0, back_h)
             # JS = JS_Distance(back_hist0, back_h)
             q0_0001 = get_q0_hist(sig_hist=sig_h,
                                   back_hist=back_h,
-                                  uncert=0.0001
+                                  uncert=0.0001,
+                                  back_weight=BackWeight
                                   )
+            # print(q0_0001)
             q0_001 = get_q0_hist(sig_hist=sig_h,
                                  back_hist=back_h,
-                                 uncert=0.001
+                                 uncert=0.001,
+                                 back_weight=BackWeight
                                  )
             q0_010 = get_q0_hist(sig_hist=sig_h,
                                  back_hist=back_h,
-                                 uncert=0.010
+                                 uncert=0.010,
+                                 back_weight=BackWeight
                                  )
             q0_100 = get_q0_hist(sig_hist=sig_h,
                                  back_hist=back_h,
-                                 uncert=0.10
+                                 uncert=0.10,
+                                 back_weight=BackWeight
                                  )
             q0_500 = get_q0_hist(sig_hist=sig_h,
                                  back_hist=back_h,
-                                 uncert=0.5
+                                 uncert=0.5,
+                                 back_weight=BackWeight
                                  )
 
             tmp_mets['efficiencies'].append(eff)

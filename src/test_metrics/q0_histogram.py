@@ -6,17 +6,28 @@ Author: Layne Bradshaw (layne.bradsh@gmail.com);
 import numpy as np
 from scipy.optimize import minimize
 from scipy.stats import poisson, norm
-from scipy.special import gamma
+from scipy.special import loggamma
+import sys
 
 
-def my_log_pois(seen, expected):
-    numerator = np.exp(-expected) * np.power(expected, seen)
-    denominator = gamma(seen + 1)
-    return np.log(numerator / denominator)
+def my_log_pois(seen, expected, back_weight):
+    # numerator = np.exp(-expected) * np.power(expected, seen)
+    if expected == 0:
+        expected = 0.5 * back_weight
+    numerator = -expected + (seen * np.log(expected))
+    if np.isinf(numerator):
+        print(expected)
+        sys.exit('bad')
+
+    denominator = loggamma(seen + 1)
+    if np.isinf(denominator):
+        print(seen, denominator)
+        sys.exit('bad')
+    return numerator - denominator
 
 
 # start by defining likelihood functions
-def unconstrained_L(params, s_vals, b_vals, dev):
+def unconstrained_L(params, s_vals, b_vals, dev, back_weight):
     """
     Likelihood function to be used for finding maximum likelihood estimators
     """
@@ -25,24 +36,39 @@ def unconstrained_L(params, s_vals, b_vals, dev):
 
     L = norm.logpdf(d, 0, dev)
     for s, b in zip(s_vals, b_vals):
-        # L += my_log_pois(s + b, mu * s + (b * (1 + d)))
-        L += poisson.logpmf(round(s + b), mu * s + (b * (1 + d)))
+        bexp = b
+        if b == 0:
+            bexp = 0.5 * back_weight
+        if s == 0 and b == 0:
+            continue
+        # if s != 0 and b == 0:
+        #     b = 1e-4
+        L += my_log_pois(s + b, mu * s + (bexp * (1 + d)), back_weight)
+        # L += poisson.logpmf(round(s + b), mu * s + (b * (1 + d)))
     return -2 * L
 
 
-def constrained_L(d, mu, s_vals, b_vals, dev):
+def constrained_L(d, mu, s_vals, b_vals, dev, back_weight):
     """
     Likelihood function to be used for finding the conditional maximum
     likelihood estimator for d, given a fixed value of mu (taken to be 0)
     """
     L = norm.logpdf(d, 0, dev)
     for s, b in zip(s_vals, b_vals):
-        # L += my_log_pois(s + b, mu * s + (b * (1 + d)))
-        L += poisson.logpmf(round(s + b), mu * s + (b * (1 + d)))
+        if b == 0:
+            bexp = 0.5 * back_weight
+        else:
+            bexp = b
+        if s == 0 and b == 0:
+            continue
+        # if s != 0 and b == 0:
+        #     b = 1e-4
+        L += my_log_pois(s + b, mu * s + (bexp * (1 + d)), back_weight)
+        # L += poisson.logpmf(round(s + b), mu * s + (b * (1 + d)))
     return -2 * L
 
 
-def get_q0_hist(sig_hist, back_hist, uncert):
+def get_q0_hist(sig_hist, back_hist, uncert, back_weight):
     '''
     Computes q0 for a given efficiency.
     Inputs:
@@ -58,23 +84,58 @@ def get_q0_hist(sig_hist, back_hist, uncert):
     back = back_hist
 
     assert len(sig) == len(back)
-
+    if np.sum(back) == 0:
+        return 0
     L_unconstrained_max = minimize(unconstrained_L,
-                                   args=(sig, back, uncert),
-                                   x0=[1, 1],
+                                   args=(sig, back, uncert, back_weight),
+                                   x0=[5, 0.1],
                                    # bounds=((0, None),
                                    #         (None, None)
                                    #         ),
                                    method='Nelder-Mead'
                                    )
+
     L_constrained_max = minimize(constrained_L,
-                                 args=(0, sig, back, uncert),
-                                 x0=[1],
+                                 args=(0, sig, back, uncert, back_weight),
+                                 x0=[0.1],
+                                 # bounds=((0, None))
                                  method='Nelder-Mead'
                                  )
+    # print('d=',L_constrained_max.x)
+    # print(L_unconstrained_max)
+    # if 'Maximum number' in L_unconstrained_max.message:
+    #     print('unconstrained')
+    #     print(L_unconstrained_max)
+    #     print('constrained')
+    #     print(L_constrained_max)
+    #
+    #     L_unconstrained_max = minimize(unconstrained_L,
+    #                                    args=(sig, back, uncert, back_weight),
+    #                                    x0=[5, 0],
+    #                                    # bounds=((0, None),
+    #                                    #         (None, None)
+    #                                    #         ),
+    #                                    method='BFGS'
+    #                                    )
+    #
+    #     L_constrained_max = minimize(constrained_L,
+    #                                  args=(0, sig, back, uncert, back_weight),
+    #                                  x0=[0],
+    #                                  # bounds=((0, None))
+    #                                  method='BFGS'
+    #                                  )
+    #     print('Powell')
+    #     print('unconstrained')
+    #     print(L_unconstrained_max)
+    #     print('constrained')
+    #     print(L_constrained_max)
+    #     print('done')
     q0 = L_constrained_max.fun - L_unconstrained_max.fun
     if L_unconstrained_max.x[0] < 0:
         q0 = 0
+    # if np.isinf(q0):
+    #     print(sig_hist, back_hist)
+    #     sys.exit('NAN')
     return q0
 
 
