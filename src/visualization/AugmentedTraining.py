@@ -83,7 +83,7 @@ for prong in [2, 3, 4]:
     #                fontsize=10,
     #                frameon=True,
     #                )
-        plt.setp(ax2.get_yticklabels(), visible=False)
+        # plt.setp(ax2.get_yticklabels(), visible=False)
     else:
         plt.setp(ax2.get_yticklabels(), visible=False)
     plt.title('{0}-prong'.format(prong))
