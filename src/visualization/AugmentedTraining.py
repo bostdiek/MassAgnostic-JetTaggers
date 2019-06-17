@@ -95,7 +95,7 @@ for prong in [2, 3, 4]:
     plt.grid()
     plt.minorticks_on()
 
-plt.savefig('reports/figures/AugmentDataTraining.pdf',
+plt.savefig('reports/figures/AugmentTrainingROCS.pdf',
             bbox_inches='tight')
 plt.clf()
 plt.close()
@@ -220,7 +220,7 @@ for prong in [2, 3, 4]:
         if i == 2 and prong == 4:
             plt.ylim(1, 16.2)
         if i == 0 and prong == 4:
-            plt.text(0.5, 1.8, '4-prong signal', ha='center', va='bottom')
+            plt.text(0.6, 1.8, '4-prong signal', ha='center', va='bottom')
         if i == 2 and prong == 3:
             plt.legend([lam_plt_dict[x] for x in lambdas_to_use[::-1]],
                        [str(x) for x in lambdas_to_use[::-1]],
