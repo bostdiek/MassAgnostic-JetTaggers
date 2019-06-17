@@ -70,14 +70,17 @@ def predict_gbc(prong, data='base'):
     '''
     if data == 'base':
         prefix = ''
+        scale = 'normal'
     elif data == 'planed':
         prefix = 'planed'
+        scale = 'normal'
     elif data == 'pca':
         prefix = 'pca'
+        scale = 'pca'
     else:
         sys.exit('Bad entry for data type')
 
-    testdf, y_test, data_cols = load_data_bdt(prong, set='test')
+    testdf, y_test, data_cols = load_data_bdt(prong, set='test', scale=scale)
     jet_mass = testdf[data_cols[0]].values
     if prefix == '':
         name = str(project_dir) + '/models/GBC_{0}p.p'.format(prong)
@@ -285,15 +288,15 @@ def main(prong):
                     '1', '1.301e+00', '1.699e+00',
                     '2', '2.301e+00', '2.699e+00', '3']
 
-    # for le in lam_exp_list:
-    #     lam = 10**float(le)
-    #     if lam > 0:
-    #         lam = round(lam)
-    #     print('Making adversarial predictions for lambda={0:03d}'.format(lam))
-    #     model_name = 'AdversaryLambda_{0:03d}'.format(lam)
-    #     ann_hist, ann_roc = predict_ann(prong, le)
-    #     HistDictionary[model_name] = ann_hist
-    #     ROCDictionary[model_name] = ann_roc
+    for le in lam_exp_list:
+        lam = 10**float(le)
+        if lam > 0:
+            lam = round(lam)
+        print('Making adversarial predictions for lambda={0:03d}'.format(lam))
+        model_name = 'AdversaryLambda_{0:03d}'.format(lam)
+        ann_hist, ann_roc = predict_ann(prong, le)
+        HistDictionary[model_name] = ann_hist
+        ROCDictionary[model_name] = ann_roc
 
     print('Making uboost predictions')
     uboost_hist, uboost_roc = predict_uboost(prong)
