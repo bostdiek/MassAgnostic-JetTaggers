@@ -24,8 +24,8 @@ plt.rcParams.update({'font.family': 'cmr10',
 
 data_dir = 'data/modelpredictions/'
 # ['#f1eef6','#d7b5d8','#df65b0','#dd1c77','#980043']
-ADV_Colors9 = [  # '#f7f4f9', '#e7e1ef', ,
-               '#d4b9da', '#c994c7', '#df65b0',
+ADV_Colors9 = [  # '#f7f4f9', , ,
+               '#e7e1ef', '#d4b9da', '#c994c7', '#df65b0',
                '#e7298a', '#ce1256', '#980043', '#67001f']
 Uboost_color = 'blue'  # '#4dac26'
 
@@ -42,7 +42,7 @@ for prong in [2, 3, 4]:
     # xr = np.linspace(1e-5, 1, 100)
     # plt.fill_between(xr, 1/xr, where=1/xr>0, color='grey')
     lam_plt_dict = {}
-    lambdas_to_use = [100, 50, 20, 10, 5, 2, 1]
+    lambdas_to_use = [1000, 100, 50, 20, 10, 5, 2, 1]
     for i, lam in enumerate(lambdas_to_use):
         lam_name = '{0:03d}'.format(lam)
         # print(i, lam, lam_name)
@@ -65,7 +65,8 @@ for prong in [2, 3, 4]:
                    frameon=True,
                    ncol=2,
                    loc='lower left',
-                   columnspacing=0.1,
+                   columnspacing=1,
+                   handlelength=1.2,
                    title=r'Adversary $\lambda$',
                    title_fontsize=10
                    )
@@ -140,7 +141,8 @@ for prong in [2, 3, 4]:
                    frameon=True,
                    ncol=2,
                    loc='upper right',
-                   columnspacing=0.1,
+                   columnspacing=1,
+                   handlelength=1.2,
                    title=r'Adversary $\lambda$',
                    title_fontsize=10
                    )
@@ -228,7 +230,8 @@ for prong in [2, 3, 4]:
                        frameon=False,
                        ncol=2,
                        loc='upper right',
-                       columnspacing=0.1,
+                       columnspacing=1,
+                       handlelength=1.2,
                        title=r'Adversary $\lambda$',
                        title_fontsize=10
                        )
