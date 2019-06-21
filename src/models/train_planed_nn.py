@@ -21,7 +21,9 @@ from HelperFunctions import load_data_nn
 @click.command()
 @click.option('--prong', default=2, type=click.IntRange(2, 4),
               help='How many prongs in signal jets')
-def train_planed_nn(prong):
+@click.option('--save', default='False', type=click.Choice(['True', 'False']),
+              help='How many prongs in signal jets')
+def train_planed_nn(prong, save):
     data = load_data_nn(prong)
     X_trainscaled = data[0]
     y_train = data[1]
@@ -48,7 +50,7 @@ def train_planed_nn(prong):
 
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, verbose=1,
                                   patience=5, min_lr=1.0e-6)
-    es = EarlyStopping(monitor='val_loss', patience=20, verbose=0, mode='auto')
+    es = EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='auto')
 
     inputs = Input(shape=(X_trainscaled.shape[1], ))
     Classifier = Dense(50, activation='relu')(inputs)
@@ -68,10 +70,11 @@ def train_planed_nn(prong):
                                   callbacks=[reduce_lr, es],
                                   sample_weight=tr_planed_weights
                                   )
-    ClassifierModel.save('models/planed_nn_{0}p.h5'.format(prong))
-
-    with open('models/histories/planed_nn_hist_{0}p.p'.format(prong), 'wb') as f:
-        pickle.dump(history, f)
+    if save == 'True':
+        ClassifierModel.save('models/planed_nn_{0}p.h5'.format(prong))
+        history_name = 'models/histories/planed_nn_hist_{0}p.p'.format(prong)
+        with open(history_name, 'wb') as f:
+            pickle.dump(history, f)
 
 
 if __name__ == '__main__':

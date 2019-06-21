@@ -17,7 +17,9 @@ from HelperFunctions import load_data_bdt
 @click.command()
 @click.option('--prong', default=2, type=click.IntRange(2, 4),
               help='How many prongs in signal jets')
-def train_PCA_gbc(prong):
+@click.option('--save', default=False, type=click.Choice(['True', 'False']),
+              help='How many prongs in signal jets')
+def train_PCA_gbc(prong, save):
     logger = logging.getLogger(__name__)
     logger.info('Starting to train GBC for {0} prong signal on PCA data'.format(prong))
     df, y, feats = load_data_bdt(prong, set='train', scale='pca')
@@ -33,10 +35,11 @@ def train_PCA_gbc(prong):
     GBC.fit(X, y.flatten())
     logger.info('finished training GBC for {0} prong signal'.format(prong))
 
-    #  save pickled classifier
-    model_file_name = 'models/pca_gbc_{0}p.p'.format(prong)
-    dump(GBC, model_file_name)
-    logger.info('saved PCA GBC model to ' + model_file_name)
+    if save == 'True':
+        #  save pickled classifier
+        model_file_name = 'models/pca_gbc_{0}p.p'.format(prong)
+        dump(GBC, model_file_name)
+        logger.info('saved PCA GBC model to ' + model_file_name)
 
 
 if __name__ == '__main__':

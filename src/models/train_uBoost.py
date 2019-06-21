@@ -19,7 +19,9 @@ from HelperFunctions import load_data_bdt
 @click.command()
 @click.option('--prong', default=2, type=click.IntRange(2, 4),
               help='How many prongs in signal jets')
-def train_uBoost(prong):
+@click.option('--save', default='False', type=click.Choice(['True', 'False']),
+              help='How many prongs in signal jets')
+def train_uBoost(prong, save):
     '''
     Input:
         prong: interger denoting the number of prongs in the signal jets
@@ -48,9 +50,10 @@ def train_uBoost(prong):
     logger.info('finished training uBoost for {0} prong signal'.format(prong))
 
     #  save pickled classifier
-    model_file_name = 'models/uBoost_{0}p.p'.format(prong)
-    dump(uboost_clf, model_file_name)
-    logger.info('saved uBoost model to ' + model_file_name)
+    if save == 'True':
+        model_file_name = 'models/uBoost_{0}p.p'.format(prong)
+        dump(uboost_clf, model_file_name)
+        logger.info('saved uBoost model to ' + model_file_name)
 
 
 if __name__ == '__main__':

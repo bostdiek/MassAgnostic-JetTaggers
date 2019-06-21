@@ -69,10 +69,11 @@ def set_mass_bins(m_train, m_val, y_train):
 @click.command()
 @click.option('--prong', default=2, type=click.IntRange(2, 4),
               help='How many prongs in signal jets')
-
 @click.option('--lam_exp', default=0, type=click.IntRange(0, 12),
               help='Exponential power of lambda')
-def train_Adversary(prong, lam_exp):
+@click.option('--save', default='False', type=click.Choice(['True', 'False']),
+              help='How many prongs in signal jets')
+def train_Adversary(prong, lam_exp, save):
     logger = logging.getLogger(__name__)
     lam = 10 ** lam_exp
     logger.info('Working on lambda={0:0.1e}'.format(lam))
@@ -254,7 +255,7 @@ def train_Adversary(prong, lam_exp):
             else:
                 print('Has not improved in {1} epochs with lr={0:1.01e}'.format(mylr,
                                                                                 count))
-        if i % 5 == 0:
+        if i % 5 == 0 and save == 'True':
             with open('models/histories/adv_lam_{0}_{1}p.p'.format(lam_exp, prong),
                       'wb') as hf:
                 pickle.dump(losses, hf)
@@ -297,12 +298,15 @@ def train_Adversary(prong, lam_exp):
                                           y=mbin_train_labels[indices]
                                           )
 
-    AdversaryModel.save_weights('models/Adv_lam_{0}_final_{1}p.h5'.format(lam_exp, prong))
-    ClassifierModel.save('models/nn_with_adv_lam_{0}_final_{1}p.h5'.format(lam_exp, prong))
-    ClassifierModel.save_weights('models/nn_with_adv_lam_{0}_final_weights_{1}p.h5'.format(lam_exp, prong))
-    with open('models/histories/adv_lam_{0}_{1}p.p'.format(lam_exp, prong),
-              'wb') as hf:
-        pickle.dump(losses, hf)
+    if save == 'True':
+        AdversaryModel.save_weights('models/Adv_lam_{0}_final_{1}p.h5'.format(lam_exp,
+                                                                              prong))
+        ClassifierModel.save('models/nn_with_adv_lam_{0}_final_{1}p.h5'.format(lam_exp,
+                                                                               prong))
+        ClassifierModel.save_weights('models/nn_with_adv_lam_{0}_final_weights_{1}p.h5'.format(lam_exp, prong))
+        with open('models/histories/adv_lam_{0}_{1}p.p'.format(lam_exp, prong),
+                  'wb') as hf:
+            pickle.dump(losses, hf)
 
 
 if __name__ == '__main__':

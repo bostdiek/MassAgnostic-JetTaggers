@@ -21,7 +21,9 @@ from HelperFunctions import load_data_PCA_nn
 @click.command()
 @click.option('--prong', default=2, type=click.IntRange(2, 4),
               help='How many prongs in signal jets')
-def train_PCA_NN(prong):
+@click.option('--save', default='False', type=click.Choice(['True', 'False']),
+              help='How many prongs in signal jets')
+def train_PCA_NN(prong, save):
     data = load_data_PCA_nn(prong)
     X_trainscaled = data[0]
     y_train = data[1]
@@ -37,7 +39,7 @@ def train_PCA_NN(prong):
     tr_class_weights = tr_class_weights.flatten()
 
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, verbose=1,
-                                  patience=5, min_lr=1.0e-6)
+                                  patience=4, min_lr=1.0e-6)
     es = EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='auto')
 
     inputs = Input(shape=(X_trainscaled.shape[1], ))
@@ -56,10 +58,11 @@ def train_PCA_NN(prong):
                                   callbacks=[reduce_lr, es],
                                   sample_weight=tr_class_weights
                                   )
-    ClassifierModel.save('models/pca_nn_{0}p.h5'.format(prong))
+    if save == 'True':
+        ClassifierModel.save('models/pca_nn_{0}p.h5'.format(prong))
 
-    with open('models/histories/pca_nn_hist_{0}p.p'.format(prong), 'wb') as f:
-        pickle.dump(history, f)
+        with open('models/histories/pca_nn_hist_{0}p.p'.format(prong), 'wb') as f:
+            pickle.dump(history, f)
 
 
 if __name__ == '__main__':
