@@ -98,9 +98,9 @@ def process_data(prong):
             mass_val
             )
 
-    X_train = X_train[:, 1:]
-    X_test = X_test[:, 1:]
-    X_val = X_val[:, 1:]
+    X_train = X_train[:, 2:]
+    X_test = X_test[:, 2:]
+    X_val = X_val[:, 2:]
     np.save('data/interim/train_X_{0}p.npy'.format(prong),
             X_train
             )
@@ -186,9 +186,9 @@ def DoPCA(prong):
     mass_train = X_train[:, 0]
     mass_test = X_test[:, 0]
     mass_val = X_val[:, 0]
-    X_train = X_train[:, 1:]
-    X_test = X_test[:, 1:]
-    X_val = X_val[:, 1:]
+    X_train = X_train[:, 2:]
+    X_test = X_test[:, 2:]
+    X_val = X_val[:, 2:]
 
     bkg_data_train = X_train[np.ravel(y_train) == 0]
     bkg_mass_train = mass_train[np.ravel(y_train) == 0]

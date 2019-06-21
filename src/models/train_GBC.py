@@ -31,6 +31,7 @@ def train_GBC(prong, save):
     logger.info('Starting to train GBC for {0} prong signal'.format(prong))
     df, y, feats = load_data_bdt(prong)
     train_features = feats[1:]
+    print('Training on, ', train_features)
 
     X = df[train_features]
 

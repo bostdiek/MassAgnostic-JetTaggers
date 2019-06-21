@@ -20,7 +20,7 @@ def load_data_bdt(prong, set='train', scale='normal'):
         y: np.array of training labels
         features: mass + names of columns to train on
     '''
-    data_cols = ['(pruned)m', 'pT', 'scaled_tau_(1)^(1/2)',
+    data_cols = ['(pruned)m', 'scaled_tau_(1)^(1/2)',  # 'pT'
                  'scaled_tau_(1)^(1)', 'scaled_tau_(1)^(2)',
                  'scaled_tau_(2)^(1/2)', 'scaled_tau_(2)^(1)', 'scaled_tau_(2)^(2)',
                  'scaled_tau_(3)^(1/2)', 'scaled_tau_(3)^(1)', 'scaled_tau_(3)^(2)',
