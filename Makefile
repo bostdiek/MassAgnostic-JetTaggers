@@ -48,9 +48,9 @@ data: requirements
 
 ## Train Base networks
 base_nn: data
-	$(PYTHON_INTERPRETER) src/models/train_base_nn.py --prong=2
-	$(PYTHON_INTERPRETER) src/models/train_base_nn.py --prong=3
-	$(PYTHON_INTERPRETER) src/models/train_base_nn.py --prong=4
+	$(PYTHON_INTERPRETER) src/models/train_base_nn.py --prong=2 --save=True
+	$(PYTHON_INTERPRETER) src/models/train_base_nn.py --prong=3 --save=True
+	$(PYTHON_INTERPRETER) src/models/train_base_nn.py --prong=4 --save=True
 
 ## Train networks on Planed data
 planed_nn: data
