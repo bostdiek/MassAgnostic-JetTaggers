@@ -222,7 +222,7 @@ def predict_ann(prong, lam):
     '''
     X_testscaled, y_test, jet_mass = load_test_data_nn(prong)
     y_test = np.ravel(y_test)
-    name = str(project_dir) + '/models/nn_with_adv_lam_{0}'.format(lam)
+    name = str(project_dir) + '/models/nn_with_adv_lam_{0:04d}'.format(lam)
     name += '_final_{0}p_nopT.h5'.format(prong)
 
     # load the model and make predictions
@@ -335,7 +335,7 @@ def main(prong):
     for lam in [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]:
         print('Making adversarial predictions for lambda={0:03d}'.format(lam))
         model_name = 'AdversaryLambda_{0:03d}'.format(lam)
-        ann_hist, ann_roc = predict_ann(prong, le)
+        ann_hist, ann_roc = predict_ann(prong, lam)
         HistDictionary[model_name] = ann_hist
         ROCDictionary[model_name] = ann_roc
     #
