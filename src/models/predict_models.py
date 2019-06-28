@@ -19,7 +19,7 @@ import sys
 
 from HelperFunctions import load_data_bdt, load_test_data_nn
 from HelperFunctions import write_roc_pickle, make_histos
-from HelperFunctions import load_test_data_PCA_nn
+from HelperFunctions import load_test_data_PCA_nn, load_test_data_unscaled
 
 
 def predict_uboost(prong):
@@ -106,6 +106,41 @@ def predict_gbc(prong, data='base'):
     return histos, roc_curve_out
 
 
+def predict_tau_n_nminus1(prong):
+    '''
+    Computes the predictions for the n-subjetiness ratios
+    Inputs:
+        prong: interger denoting the number of prongs in the signal jets
+    Outputs:
+        sig_prob: [np array] probability of being selected for each event
+        fpr: [np array] false positive rate
+        tpr: [np array] true postive rate
+        threholds: [np array] cut values corresponding to the fpr and tpr
+        auc: [float] the area under the ROC curve
+    '''
+    X_test, y_test, jet_mass = load_test_data_unscaled(prong)
+    y_test = np.ravel(y_test)
+
+    tau_dict = {2: [4, 1],
+                3: [7, 4],
+                4: [9, 7]
+                }
+    taus = tau_dict[prong]
+
+    tau_pred = -X_test[:, taus[0]] / X_test[:, taus[1]]
+
+    # compute the test statistics
+    fpr, tpr, thresholds = roc_curve(y_true=y_test, y_score=tau_pred)
+    auc_score = auc(fpr, tpr)
+    roc_info = fpr, tpr, thresholds, auc_score
+    # save the info
+    model_name = 'tau_subjettiness_{0}p'.format(prong)
+    roc_curve_out = write_roc_pickle(model_name, roc_info)
+    histos = make_histos(model_name, jet_mass, tau_pred, y_test, roc_info)
+
+    return histos, roc_curve_out
+
+
 def predict_base_nn(prong):
     '''
     Computes the predictions for the base neural network.
@@ -172,12 +207,12 @@ def predict_planed_nn(prong):
     return histos, roc_curve_out
 
 
-def predict_ann(prong, lam_exp):
+def predict_ann(prong, lam):
     '''
     Computes the predictions for the adversarial neural network.
     Inputs:
         prong: [interger] denoting the number of prongs in the signal jets
-        lam_exp: [string] the adversary lambda is given by 10**(lam_exp)
+        lam: [integer] the adversary lambda
     Outputs:
         sig_prob: [np array] probability of being selected for each event
         fpr: [np array] false positive rate
@@ -187,8 +222,8 @@ def predict_ann(prong, lam_exp):
     '''
     X_testscaled, y_test, jet_mass = load_test_data_nn(prong)
     y_test = np.ravel(y_test)
-    name = str(project_dir) + '/models/nn_with_adv_lam_{0}'.format(lam_exp)
-    name += '_final_{0}p.h5'.format(prong)
+    name = str(project_dir) + '/models/nn_with_adv_lam_{0}'.format(lam)
+    name += '_final_{0}p_nopT.h5'.format(prong)
 
     # load the model and make predictions
     model = load_model(name)
@@ -202,7 +237,7 @@ def predict_ann(prong, lam_exp):
     roc_info = fpr, tpr, thresholds, auc_score
 
     # save the info
-    lam = 10**float(lam_exp)
+    # lam = 10**float(lam)
     if lam > 0:
         lam = round(lam)
     model_name = 'adv_nn_lam_{0:03d}_{1}p'.format(lam, prong)
@@ -254,6 +289,11 @@ def main(prong):
     HistDictionary = {}
     ROCDictionary = {}
 
+    print('Making tau_n /tau_n-1 predictions')
+    tau_hist, tau_roc = predict_tau_n_nminus1(prong)
+    HistDictionary['TauSubjettiness'] = tau_hist
+    ROCDictionary['TauSubjettiness'] = tau_roc
+
     print('Making gradient boosted decision tree predictions')
     gbc_hist, gbc_roc = predict_gbc(prong, data='base')
     HistDictionary['GradientBoostingClassifier'] = gbc_hist
@@ -284,20 +324,21 @@ def main(prong):
     HistDictionary['PCAGBC'] = pcagbc_hist
     ROCDictionary['PCAGBC'] = pcagbc_roc
 
-    lam_exp_list = ['0', '3.010e-01', '6.990e-01',
-                    '1', '1.301e+00', '1.699e+00',
-                    '2', '2.301e+00', '2.699e+00', '3']
-
-    for le in lam_exp_list:
-        lam = 10**float(le)
-        if lam > 0:
-            lam = round(lam)
+    # lam_exp_list = ['0', '3.010e-01', '6.990e-01',
+    #                 '1', '1.301e+00', '1.699e+00',
+    #                 '2', '2.301e+00', '2.699e+00', '3']
+    #
+    # for le in lam_exp_list:
+    #     lam = 10**float(le)
+    #     if lam > 0:
+    #         lam = round(lam)
+    for lam in [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]:
         print('Making adversarial predictions for lambda={0:03d}'.format(lam))
         model_name = 'AdversaryLambda_{0:03d}'.format(lam)
         ann_hist, ann_roc = predict_ann(prong, le)
         HistDictionary[model_name] = ann_hist
         ROCDictionary[model_name] = ann_roc
-
+    #
     print('Making uboost predictions')
     uboost_hist, uboost_roc = predict_uboost(prong)
     HistDictionary['uBoost'] = uboost_hist
