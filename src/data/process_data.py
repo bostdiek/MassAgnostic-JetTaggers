@@ -98,6 +98,16 @@ def process_data(prong):
             mass_val
             )
 
+    np.save('data/interim/train_jetpT_{0}p.npy'.format(prong),
+            X_train[:, 1]
+            )
+    np.save('data/interim/test_jetpT_{0}p.npy'.format(prong),
+            X_test[:, 1]
+            )
+    np.save('data/interim/val_jetpT_{0}p.npy'.format(prong),
+            X_val[:, 1]
+            )
+
     X_train = X_train[:, 2:]
     X_test = X_test[:, 2:]
     X_val = X_val[:, 2:]

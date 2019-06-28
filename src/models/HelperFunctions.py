@@ -20,7 +20,7 @@ def load_data_bdt(prong, set='train', scale='normal'):
         y: np.array of training labels
         features: mass + names of columns to train on
     '''
-    data_cols = ['(pruned)m', 'scaled_tau_(1)^(1/2)',  # 'pT', 
+    data_cols = ['(pruned)m', 'scaled_tau_(1)^(1/2)',  # 'pT',
                  'scaled_tau_(1)^(1)', 'scaled_tau_(1)^(2)',
                  'scaled_tau_(2)^(1/2)', 'scaled_tau_(2)^(1)', 'scaled_tau_(2)^(2)',
                  'scaled_tau_(3)^(1/2)', 'scaled_tau_(3)^(1)', 'scaled_tau_(3)^(2)',
@@ -171,6 +171,7 @@ def load_test_data_unscaled(prong):
         X_test: numpy array of test data with no scaling
         y_test: test labels
         mass: numpy array for the jet masses
+        pt: numpy array for the jet transverse momentum
     '''
     test_x_name = 'test_X_{0}p.npy'.format(prong)
     X_test = np.load(interim_datadir + test_x_name)
@@ -181,7 +182,10 @@ def load_test_data_unscaled(prong):
     m_name = 'test_jetmass_{0}p.npy'.format(prong)
     mass = np.load(interim_datadir + m_name)
 
-    return X_test, y_test, mass
+    pt_name = 'test_jetpT_{0}p.npy'.format(prong)
+    pt = np.load(interim_datadir + pt_name)
+
+    return X_test, y_test, mass, pt
 
 
 def write_roc_pickle(file_name, roc_info):
