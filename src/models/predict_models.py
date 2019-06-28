@@ -16,11 +16,15 @@ import pickle
 from pathlib import Path
 import logging
 import sys
+from scipy.stats import linregress
 
 from HelperFunctions import load_data_bdt, load_test_data_nn
 from HelperFunctions import write_roc_pickle, make_histos
 from HelperFunctions import load_test_data_PCA_nn, load_test_data_unscaled
 
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 def predict_uboost(prong):
     '''
@@ -118,7 +122,7 @@ def predict_tau_n_nminus1(prong):
         threholds: [np array] cut values corresponding to the fpr and tpr
         auc: [float] the area under the ROC curve
     '''
-    X_test, y_test, jet_mass = load_test_data_unscaled(prong)
+    X_test, y_test, jet_mass, pt = load_test_data_unscaled(prong)
     y_test = np.ravel(y_test)
 
     tau_dict = {2: [4, 1],
@@ -137,6 +141,56 @@ def predict_tau_n_nminus1(prong):
     model_name = 'tau_subjettiness_{0}p'.format(prong)
     roc_curve_out = write_roc_pickle(model_name, roc_info)
     histos = make_histos(model_name, jet_mass, tau_pred, y_test, roc_info)
+
+    return histos, roc_curve_out
+
+
+def predict_tau_21prime(prong):
+    '''
+    Computes the predictions for the n-subjetiness ratios
+    Inputs:
+        prong: interger denoting the number of prongs in the signal jets
+    Outputs:
+        sig_prob: [np array] probability of being selected for each event
+        fpr: [np array] false positive rate
+        tpr: [np array] true postive rate
+        threholds: [np array] cut values corresponding to the fpr and tpr
+        auc: [float] the area under the ROC curve
+    '''
+    X_test, y_test, jet_mass, jet_pt = load_test_data_unscaled(prong)
+    y_test = np.ravel(y_test)
+
+    tau_21 = X_test[:, 4] / X_test[:, 1]
+    rhoprime = 2 * np.log(jet_mass) - np.log(jet_pt)
+
+    # find the slope of the average tau21 values for the background only
+    rhop_back = rhoprime[y_test == 0]
+    tau21_back = tau_21[y_test == 0]
+    bins = np.linspace(np.min(rhop_back), np.max(rhop_back), 25)
+    rhop_bins = np.digitize(rhop_back, bins)
+    print(np.unique(rhop_bins))
+    backmeans = []
+    for i in range(1, 26):
+        backmeans.append(np.mean(tau21_back[rhop_bins == i]))
+
+    # slope for middle bins
+    x = bins[5:-5]
+    y = backmeans[5:-5]
+    slope, _, _, _, _ = linregress(x, y)
+
+    tau_21_ddt = tau_21 - slope * rhoprime
+    tau_21_ddt_back = tau_21_ddt[y_test == 0]
+    backmeans_prime = []
+    for i in range(1, 26):
+        backmeans_prime.append(np.mean(tau_21_ddt_back[rhop_bins == i]))
+
+    fpr, tpr, thresholds = roc_curve(y_true=y_test, y_score=-tau_21_ddt)
+    auc_score = auc(fpr, tpr)
+    roc_info = fpr, tpr, thresholds, auc_score
+    # save the info
+    model_name = 'tau_21_ddt_{0}p'.format(prong)
+    roc_curve_out = write_roc_pickle(model_name, roc_info)
+    histos = make_histos(model_name, jet_mass, -tau_21_ddt, y_test, roc_info)
 
     return histos, roc_curve_out
 
@@ -293,6 +347,10 @@ def main(prong):
     tau_hist, tau_roc = predict_tau_n_nminus1(prong)
     HistDictionary['TauSubjettiness'] = tau_hist
     ROCDictionary['TauSubjettiness'] = tau_roc
+
+    if prong == 2:
+        print('Making tau_2 /tau_1 prime predictions')
+        predict_tau_21prime(prong)
 
     print('Making gradient boosted decision tree predictions')
     gbc_hist, gbc_roc = predict_gbc(prong, data='base')
