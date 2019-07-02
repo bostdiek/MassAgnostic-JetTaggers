@@ -350,7 +350,9 @@ def main(prong):
 
     if prong == 2:
         print('Making tau_2 /tau_1 prime predictions')
-        predict_tau_21prime(prong)
+        tauddt_hist, tauddt_roc = predict_tau_21prime(prong)
+        HistDictionary['TauDDT'] = tauddt_hist
+        ROCDictionary['TauDDT'] = tauddt_roc
 
     print('Making gradient boosted decision tree predictions')
     gbc_hist, gbc_roc = predict_gbc(prong, data='base')
