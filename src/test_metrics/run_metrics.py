@@ -16,9 +16,9 @@ from Distances import BhatDist, JS_Distance
 from q0_histogram import get_q0_hist
 
 
-HistConditions = {2: [10000, 100, 15],
-                  3: [10000, 100, 15],
-                  4: [10000, 100, 10]
+HistConditions = {2: [10000, 100, 35],
+                  3: [10000, 100, 35],
+                  4: [10000, 100, 35]
                   }
 
 
@@ -50,11 +50,11 @@ def run_metrics(prong):
         tmp_mets = {'efficiencies': [],
                     'BhatD': [],
                     # 'JSD': [],
-                    'q0_0.0001': [],
-                    'q0_0.001': [],
-                    'q0_0.01': [],
-                    'q0_0.1': [],
-                    'q0_0.5': []
+                    # 'q0_0.0001': [],
+                    # 'q0_0.001': [],
+                    # 'q0_0.01': [],
+                    # 'q0_0.1': [],
+                    # 'q0_0.5': []
                     }
 
         for eff in AllHists[model]:
@@ -71,41 +71,41 @@ def run_metrics(prong):
             # print(sig_h, back_h)
             BD = BhatDist(back_hist0, back_h)
             # JS = JS_Distance(back_hist0, back_h)
-            q0_0001 = get_q0_hist(sig_hist=sig_h,
-                                  back_hist=back_h,
-                                  uncert=0.0001,
-                                  back_weight=BackWeight
-                                  )
-            # print(q0_0001)
-            q0_001 = get_q0_hist(sig_hist=sig_h,
-                                 back_hist=back_h,
-                                 uncert=0.001,
-                                 back_weight=BackWeight
-                                 )
-            q0_010 = get_q0_hist(sig_hist=sig_h,
-                                 back_hist=back_h,
-                                 uncert=0.010,
-                                 back_weight=BackWeight
-                                 )
-            q0_100 = get_q0_hist(sig_hist=sig_h,
-                                 back_hist=back_h,
-                                 uncert=0.10,
-                                 back_weight=BackWeight
-                                 )
-            q0_500 = get_q0_hist(sig_hist=sig_h,
-                                 back_hist=back_h,
-                                 uncert=0.5,
-                                 back_weight=BackWeight
-                                 )
+            # q0_0001 = get_q0_hist(sig_hist=sig_h,
+            #                       back_hist=back_h,
+            #                       uncert=0.0001,
+            #                       back_weight=BackWeight
+            #                       )
+            # # print(q0_0001)
+            # q0_001 = get_q0_hist(sig_hist=sig_h,
+            #                      back_hist=back_h,
+            #                      uncert=0.001,
+            #                      back_weight=BackWeight
+            #                      )
+            # q0_010 = get_q0_hist(sig_hist=sig_h,
+            #                      back_hist=back_h,
+            #                      uncert=0.010,
+            #                      back_weight=BackWeight
+            #                      )
+            # q0_100 = get_q0_hist(sig_hist=sig_h,
+            #                      back_hist=back_h,
+            #                      uncert=0.10,
+            #                      back_weight=BackWeight
+            #                      )
+            # q0_500 = get_q0_hist(sig_hist=sig_h,
+            #                      back_hist=back_h,
+            #                      uncert=0.5,
+            #                      back_weight=BackWeight
+            #                      )
 
             tmp_mets['efficiencies'].append(eff)
             tmp_mets['BhatD'].append(BD)
             # tmp_mets['JSD'].append(JS)
-            tmp_mets['q0_0.0001'].append(q0_0001)
-            tmp_mets['q0_0.001'].append(q0_001)
-            tmp_mets['q0_0.01'].append(q0_010)
-            tmp_mets['q0_0.1'].append(q0_100)
-            tmp_mets['q0_0.5'].append(q0_500)
+            # tmp_mets['q0_0.0001'].append(q0_0001)
+            # tmp_mets['q0_0.001'].append(q0_001)
+            # tmp_mets['q0_0.01'].append(q0_010)
+            # tmp_mets['q0_0.1'].append(q0_100)
+            # tmp_mets['q0_0.5'].append(q0_500)
 
         MetricsDict[model] = tmp_mets
 
