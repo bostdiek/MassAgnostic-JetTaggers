@@ -21,13 +21,164 @@ plt.rcParams.update({'font.family': 'cmr10',
                      'xtick.top': True,
                      'ytick.right': True
                      })
-
+project_dir = Path(__file__).resolve().parents[2]
+p_name = project_dir.joinpath('data/modelpredictions/')
+data_dir = str(p_name.resolve())
 data_dir = 'data/modelpredictions/'
 # ['#f1eef6','#d7b5d8','#df65b0','#dd1c77','#980043']
 ADV_Colors9 = [  # '#f7f4f9', , ,
                '#e7e1ef', '#d4b9da', '#c994c7', '#df65b0',
                '#e7298a', '#ce1256', '#980043', '#67001f']
 Uboost_color = 'blue'  # '#4dac26'
+
+# ******************** Overview plot **********************
+with open(data_dir + '/Histograms_2p.p', 'rb') as f:
+    Hist_2p = pickle.load(f)
+
+with open(data_dir + '/ROCCurves_2p.p', 'rb') as f:
+    ROC_2p = pickle.load(f)
+print(ROC_2p.keys())
+plt.figure(figsize=(7.25, 2.0))
+ax0 = gs0 = gs.GridSpec(1, 2, width_ratios=[1, 2], wspace=0.5)
+plot_keys = [0.95, 0.9, 0.8, 0.70, 0.60, 0.5]
+mycolors = ['C2', 'C3', 'C4', 'C5', 'C6', 'C8']
+# ************* Plot *************
+plt.subplot(gs0[0])
+plt.xlabel('Signal Efficiency')
+plt.ylabel('Background Rejection')
+plt.yscale('log')
+plt.ylim(1, 1e4)
+plt.yticks([1, 10, 100, 1000, 10000])
+plt.xlim(0, 1)
+plt.plot(ROC_2p['BaseNeuralNetwork']['x_data'],
+         ROC_2p['BaseNeuralNetwork']['y_data'],
+         label='Orig.',
+         color='C0',
+         ls='-'
+         )
+# plt.plot(ROC_2p['GradientBoostingClassifier']['x_data'],
+#          ROC_2p['GradientBoostingClassifier']['y_data'],
+#          label='BDT',
+#          color='C0',
+#          ls='--'
+#          )
+plt.plot(ROC_2p['TauSubjettiness']['x_data'],
+         ROC_2p['TauSubjettiness']['y_data'],
+         label=r'$\tau_{21}$',
+         color='hotpink',
+         ls=':'
+         )
+plt.plot(ROC_2p['AdversaryLambda_050']['x_data'],
+         ROC_2p['AdversaryLambda_050']['y_data'],
+         label='Adv.',
+         color='C4'
+         )
+plt.plot(ROC_2p['uBoost']['x_data'],
+         ROC_2p['uBoost']['y_data'],
+         label='uBoost',
+         color='blue',
+         ls='--'
+         )
+# plt.legend(frameon=False, fontsize=12, loc=(0.3, 0.4))
+# plt.plot(ROC_2p['TauSubjettiness']['x_data'],
+#          ROC_2p['TauSubjettiness']['y_data'],
+#          label=r'$\tau_{21}$',
+#          color='hotpink',
+#          )
+# plt.plot(ROC_2p['TauDDT']['x_data'],
+#          ROC_2p['TauDDT']['y_data'],
+#          label=r'$\tau_{21}^{\prime}$',
+#          color='purple'
+#          )
+plt.legend(frameon=False, fontsize=10,
+           loc=(0.37, 0.38),
+           labelspacing=0.15
+           )
+# plt.legend(frameon=False, fontsize=10, loc=(0.5, -0.75), ncol=3)
+plt.text(0.5, 6e3, '2-Prong Signal', ha='center', va='top')
+plt.minorticks_on()
+print('AUC Adv Lamda=50 = {0:0.3f}'.format(ROC_2p['AdversaryLambda_050']['auc']))
+print('AUCuBoost = {0:0.3f}'.format(ROC_2p['uBoost']['auc']))
+# ***********************************************
+gs1 = gs.GridSpecFromSubplotSpec(1, 2, gs0[1], wspace=0.1)
+ax1 = plt.subplot(gs1[0])
+plt.xlabel(r'$m_{J}$ [GeV]')
+plt.xlim(50, 400)
+plt.yscale('log')
+plt.minorticks_on()
+plt.ylabel('Arb.')
+# plt.setp(ax1.get_yticklabels(), visible=False)
+hists = Hist_2p['AdversaryLambda_050']
+plt.hist(hists[1][1], range=(50, 400), histtype='step', bins=35, color='k')
+for i, eff in enumerate(plot_keys):
+    plt.hist(hists[eff][1],
+             range=(50, 400),
+             histtype='step',
+             bins=35,
+             color=mycolors[i]
+             )
+plt.text(450 / 2, 7e3, 'Adv', fontsize=12, ha='center', va='top')
+plt.hist(hists[1][0], range=(50, 400),
+         bins=35,
+         color='grey',
+         alpha=0.4,
+         weights=0.2 * np.ones_like(hists[1][0]))
+
+# *********************************
+ax2 = plt.subplot(gs1[1], sharey=ax1)
+plt.xlabel(r'$m_{J}$ [GeV]')
+plt.xlim(50, 400)
+plt.yscale('log')
+plt.ylim(10, 1e4)
+plt.setp(ax2.get_yticklabels(), visible=False)
+plt.minorticks_on()
+hists = Hist_2p['uBoost']
+plt.hist(hists[1][1], range=(50, 400), histtype='step', bins=35, color='k')
+for i, eff in enumerate(plot_keys):
+    plt.hist(hists[eff][1],
+             range=(50, 400),
+             histtype='step',
+             bins=35,
+             color=mycolors[i]
+             )
+plt.text(450 / 2, 7e3, 'uBoost',
+         fontsize=12, ha='center', va='top')
+plt.hist(hists[1][0], range=(50, 400),
+         bins=35,
+         color='grey',
+         alpha=0.4,
+         weights=0.2 * np.ones_like(hists[1][0]))
+
+# *********************************
+# ax2 = plt.subplot(gs1[0], sharey=ax1)
+# plt.xlabel(r'$m_{J}$ [GeV]')
+# plt.xlim(50, 400)
+# plt.yscale('log')
+# plt.ylim(10, 1e4)
+#
+# plt.minorticks_on()
+# hists = Hist_2p['TauDDT']
+# plt.hist(hists[1][1], range=(50, 400), histtype='step', bins=35, color='k')
+# for i, eff in enumerate(plot_keys):
+#     plt.hist(hists[eff][1],
+#              range=(50, 400),
+#              histtype='step',
+#              bins=35,
+#              color=mycolors[i]
+#              )
+# plt.text(450 / 2, 7e3, r'$\tau_{21}^{\prime}$',
+#          fontsize=12, ha='center', va='top')
+# plt.hist(hists[1][0], range=(50, 400),
+#          bins=35,
+#          color='grey',
+#          alpha=0.4,
+#          weights=0.2 * np.ones_like(hists[1][0]))
+#
+fname_name = project_dir.joinpath('reports/figures/AugmentedTrainingTechniques.pdf')
+plt.savefig(fname_name.resolve(),
+            bbox_inches='tight'
+            )
+# ***************************************************
 
 # ROC Curves
 plt.figure(figsize=(8.5, 2.5))
@@ -42,41 +193,75 @@ for prong in [2, 3, 4]:
     # xr = np.linspace(1e-5, 1, 100)
     # plt.fill_between(xr, 1/xr, where=1/xr>0, color='grey')
     lam_plt_dict = {}
-    lambdas_to_use = [1000, 100, 50, 20, 10, 5, 2, 1]
+    lambdas_to_use = [50]  # 1000, 100, 50, 20, 10, 5, 2, 1]
     for i, lam in enumerate(lambdas_to_use):
         lam_name = '{0:03d}'.format(lam)
-        # print(i, lam, lam_name)
+        print(i, lam, lam_name)
         lamplt, = plt.plot(ROCS['AdversaryLambda_' + lam_name]['x_data'],
                            ROCS['AdversaryLambda_' + lam_name]['y_data'],
-                           color=ADV_Colors9[i],
-                           # label=r'$\lambda=$' + '{0}'.format(lam)
+                           color='C4',  # ADV_Colors9[i],
+                           label=r'$\lambda=$' + '{0}'.format(lam)
                            )
         lam_plt_dict[lam] = lamplt
         print(prong, lam, ROCS['AdversaryLambda_' + lam_name]['auc'])
     ubst, = plt.plot(ROCS['uBoost']['x_data'],
                      ROCS['uBoost']['y_data'],
                      color=Uboost_color,
-                     ls='--', lw=1.5
+                     ls='--',  # lw=1.5
                      )
-    if prong == 4:
-        plt.legend([lam_plt_dict[x] for x in lambdas_to_use[::-1]],
-                   [str(x) for x in lambdas_to_use[::-1]],
+    bsnn, = plt.plot(ROCS['BaseNeuralNetwork']['x_data'],
+                     ROCS['BaseNeuralNetwork']['y_data'],
+                     color='C0'
+                     )
+    bdt, = plt.plot(ROCS['GradientBoostingClassifier']['x_data'],
+                    ROCS['GradientBoostingClassifier']['y_data'],
+                    label='BDT',
+                    color='C0',
+                    ls='--'
+                    )
+    taunn, = plt.plot(ROCS['TauSubjettiness']['x_data'],
+                      ROCS['TauSubjettiness']['y_data'],
+                      color='hotpink',
+                      ls=':'
+                      )
+    nn, = plt.plot([], [], color='k', label='NN')
+    gbc, = plt.plot([], [], color='k', ls='--', label='BDT')
+    singlevar, = plt.plot([], [], color='k', ls=':', label='Single Variable')
+    if prong == 2:
+        taunnddt, = plt.plot(ROCS['TauDDT']['x_data'],
+                             ROCS['TauDDT']['y_data'],
+                             color='purple',
+                             ls=':'
+                             )
+    elif prong == 3:
+        plt.legend([nn, gbc, singlevar],
+                   ['NN', 'BDT', 'Single Variable'],
                    fontsize=10,
                    frameon=True,
-                   ncol=2,
-                   loc='lower left',
-                   columnspacing=1,
-                   handlelength=1.2,
-                   title=r'Adversary $\lambda$',
-                   title_fontsize=10
                    )
+    # if prong == 4:
+    #     plt.legend([lam_plt_dict[x] for x in lambdas_to_use[::-1]],
+    #                [str(x) for x in lambdas_to_use[::-1]],
+    #                fontsize=10,
+    #                frameon=True,
+    #                ncol=2,
+    #                loc='lower left',
+    #                columnspacing=1,
+    #                handlelength=1.2,
+    #                title=r'Adversary $\lambda$',
+    #                title_fontsize=10,
+    #                labelspacing=0.1
+    #                )
     if prong == 2:
         plt.ylabel('Background Rejection')
-        plt.legend([lam_plt_dict[5], ubst],
-                   ['Adv. NN.', 'uBoost'],
+        plt.legend([bsnn, ubst, lam_plt_dict[50], taunn, taunnddt],
+                   ['Original', 'uBoost', 'Adv.', r'$\tau_N/\tau_{N-1}$',
+                    r'$\tau_{21}^{\prime}$'
+                    ],
                    fontsize=10,
                    frameon=True,
-                   loc='upper right'
+                   loc='upper right',
+                   labelspacing=0.1
                    )
     # elif prong == 3:
     #     plt.legend([nn, gbc],
@@ -116,35 +301,51 @@ for prong in [2, 3, 4]:
         # print(i, lam, lam_name)
         lamplt, = plt.plot(AllMets['AdversaryLambda_' + lam_name]['efficiencies'],
                            AllMets['AdversaryLambda_' + lam_name]['BhatD'],
-                           color=ADV_Colors9[i],
+                           color='C4'  # ADV_Colors9[i],
                            # label=r'$\lambda=$' + '{0}'.format(lam)
                            )
         lam_plt_dict[lam] = lamplt
     ubst, = plt.plot(AllMets['uBoost']['efficiencies'],
                      AllMets['uBoost']['BhatD'],
                      color=Uboost_color,
-                     ls='--', lw=1.5
+                     ls='--',  # lw=1.5
                      )
+    plt.plot(AllMets['BaseNeuralNetwork']['efficiencies'],
+             AllMets['BaseNeuralNetwork']['BhatD'],
+             color='C0'
+             )
+    plt.plot(AllMets['GradientBoostingClassifier']['efficiencies'],
+             AllMets['GradientBoostingClassifier']['BhatD'],
+             color='C0',
+             ls='--'
+             )
+    plt.plot(AllMets['TauSubjettiness']['efficiencies'],
+             AllMets['TauSubjettiness']['BhatD'],
+             color='hotpink',
+             ls=':'
+             )
     if prong == 2:
         plt.ylabel('Bhattacharyya distance')
         # plt.ylabel('Bhat. Dist.')
-        plt.legend([lam_plt_dict[5], ubst],
-                   ['Adv. NN.', 'uBoost'],
+        taunnddt, = plt.plot(AllMets['TauDDT']['efficiencies'],
+                             AllMets['TauDDT']['BhatD'],
+                             color='purple',
+                             ls=':'
+                             )
+        plt.legend([bsnn, ubst, lam_plt_dict[50], taunn, taunnddt],
+                   ['Original', 'uBoost', 'Adv.', r'$\tau_N/\tau_{N-1}$',
+                    r'$\tau_{21}^{\prime}$'
+                    ],
                    fontsize=10,
                    frameon=True,
-                   loc='upper right'
+                   loc='upper right',
+                   labelspacing=0.1
                    )
     elif prong == 3:
-        plt.legend([lam_plt_dict[x] for x in lambdas_to_use[::-1]],
-                   [str(x) for x in lambdas_to_use[::-1]],
+        plt.legend([nn, gbc, singlevar],
+                   ['NN', 'BDT', 'Single Variable'],
                    fontsize=10,
                    frameon=True,
-                   ncol=2,
-                   loc='upper right',
-                   columnspacing=1,
-                   handlelength=1.2,
-                   title=r'Adversary $\lambda$',
-                   title_fontsize=10
                    )
         plt.setp(ax2.get_yticklabels(), visible=False)
     else:
@@ -161,88 +362,292 @@ plt.savefig('reports/figures/AugmentTrainingBhat.pdf',
             bbox_inches='tight')
 plt.clf()
 plt.close()
-#
-# # *********** q0 ***********
-plt.figure(figsize=(8.5, 7.5))
-gs0 = gs.GridSpec(3, 3, wspace=0.05, hspace=0.05)
+
+
+# *********** Background rejection versus Distance ***********
+plt.figure(figsize=(8.5, 2.5))
+gs0 = gs.GridSpec(1, 3, wspace=0.1)
+
+# axesdict = {2: plt.subplot(gs0[0]),
+#             3: plt.subplot(gs0[1], sharey=ax0),
+#             4: plt.subplot(gs0[2], sharey=ax0)
+#             }
 for prong in [2, 3, 4]:
+    if prong == 2:
+        ax = plt.subplot(gs0[prong - 2])
+        plt.ylabel('Bhattacharyya Distance')
+    else:
+        ax1 = plt.subplot(gs0[prong - 2])  #,
+                          # sharey=ax)
+        plt.setp(ax1.get_yticklabels(), visible=False)
+        plt.xlim(2e4, 0.8)
+    plt.xlabel('Background Rejection')
+    plt.xscale('log')
+    # plt.xlim(2e4, 0.8)
+    plt.xticks([1e4, 1e3, 1e2, 1e1, 1e0])
+    plt.ylim(-0.05, 1.0)
+    plt.minorticks_on()
+    # Load the data
     with open(data_dir + 'Metrics_{0}p.p'.format(prong), 'rb') as fin:
         AllMets = pickle.load(fin)
-#
-    ax_dict = {}
-    titles = ['1% uncertainty', '10% uncertainty', '50% uncertainty']
-    for i, metric in enumerate(['q0_0.01', 'q0_0.1', 'q0_0.5']):
-        if i == 0:
-            ax0 = plt.subplot(gs0[(prong - 2) * 3])
-        else:
-            ax = plt.subplot(gs0[(prong - 2) * 3 + i], sharey=ax0)
-        print(np.sqrt(AllMets['AdversaryLambda_' + lam_name][metric]))
-        xspace = np.linspace(0.05, 1, 50)
-        for j, lam in enumerate(lambdas_to_use):
-            lam_name = '{0:03d}'.format(lam)
-            effarray = np.array(AllMets['AdversaryLambda_' + lam_name]['efficiencies'])
-            qoarray = np.array(np.sqrt(AllMets['AdversaryLambda_' + lam_name][metric]))
-            q0interp = interp1d(effarray[~np.isinf(qoarray)],
-                                qoarray[~np.isinf(qoarray)],
-                            fill_value=[0],
-                            bounds_error=False
-                            )
-            plt.plot(xspace, q0interp(xspace), color=ADV_Colors9[j])
+    with open(data_dir + 'ROCCurves_{0}p.p'.format(prong), 'rb') as fin:
+        ROCS = pickle.load(fin)
 
-        effarray = np.array(AllMets['uBoost']['efficiencies'])
-        qoarray = np.array(np.sqrt(AllMets['uBoost'][metric]))
-        q0interp = interp1d(effarray[~np.isinf(qoarray)],
-                            qoarray[~np.isinf(qoarray)],
-                        fill_value=[0],
-                        bounds_error=False
-                        )
-        plt.plot(xspace, q0interp(xspace), color=Uboost_color, ls='--', lw=1.5)
+    # interpolate the backfround rejections
+    backrej = interp1d(ROCS['BaseNeuralNetwork']['x_data'],
+                       ROCS['BaseNeuralNetwork']['y_data'],
+                       fill_value="extrapolate"
+                       )
+    dist = interp1d(AllMets['BaseNeuralNetwork']['efficiencies'],
+                    AllMets['BaseNeuralNetwork']['BhatD'])
+    base, = plt.plot(backrej(AllMets['BaseNeuralNetwork']['efficiencies']),
+                     dist(AllMets['BaseNeuralNetwork']['efficiencies']),
+                     color='C0'
+                     )
+    plt.scatter(backrej(0.5), dist(0.5), marker='*', s=25, color='C0', zorder=10)
+    plt.scatter(backrej(0.25), dist(0.25), marker='s', s=25, color='C0', zorder=10)
+    plt.scatter(backrej(0.75), dist(0.75), marker='o', s=25, color='C0', zorder=10)
 
-        if i != 0:
-            plt.setp(ax.get_yticklabels(), visible=False)
-        else:
-            plt.ylabel(r'$\sqrt{q_0}$')
-        if prong == 4:
-            plt.xlabel('Signal Efficiency')
-        else:
-            if i == 0:
-                plt.setp(ax0.get_xticklabels(), visible=False)
-            else:
-                plt.setp(ax.get_xticklabels(), visible=False)
-        if prong == 2:
-            plt.title(titles[i])
-        if i == 2 and prong == 2:
-            plt.ylim(0.5, 3)
-        if i == 0 and prong == 2:
-            plt.text(0.5, 0.65, '2-prong signal', ha='center', va='bottom')
-        if i == 2 and prong == 3:
-            plt.ylim(1, 7.2)
-        if i == 0 and prong == 3:
-            plt.text(0.5, 1.4, '3-prong signal', ha='center', va='bottom')
-        if i == 2 and prong == 4:
-            plt.ylim(1, 16.2)
-        if i == 0 and prong == 4:
-            plt.text(0.6, 1.8, '4-prong signal', ha='center', va='bottom')
-        if i == 2 and prong == 3:
-            plt.legend([lam_plt_dict[x] for x in lambdas_to_use[::-1]],
-                       [str(x) for x in lambdas_to_use[::-1]],
-                       fontsize=10,
-                       frameon=False,
-                       ncol=2,
-                       loc='upper right',
-                       columnspacing=1,
-                       handlelength=1.2,
-                       title=r'Adversary $\lambda$',
-                       title_fontsize=10
+    backrej = interp1d(ROCS['GradientBoostingClassifier']['x_data'],
+                       ROCS['GradientBoostingClassifier']['y_data'],
+                       fill_value="extrapolate"
                        )
-        if i == 2 and prong == 2:
-            plt.legend([lam_plt_dict[5], ubst],
-                       ['Adv. NN.', 'uBoost'],
-                       fontsize=10,
-                       frameon=False,
-                       loc='upper right'
+    dist = interp1d(AllMets['GradientBoostingClassifier']['efficiencies'],
+                    AllMets['GradientBoostingClassifier']['BhatD'])
+    bdt, = plt.plot(backrej(AllMets['GradientBoostingClassifier']['efficiencies']),
+                    dist(AllMets['GradientBoostingClassifier']['efficiencies']),
+                    color='C0',
+                    ls='--'
+                    )
+    plt.scatter(backrej(0.5), dist(0.5), marker='*', s=25, color='C0', zorder=10)
+    plt.scatter(backrej(0.25), dist(0.25), marker='s', s=25, color='C0', zorder=10)
+    plt.scatter(backrej(0.75), dist(0.75), marker='o', s=25, color='C0', zorder=10)
+
+    backrej = interp1d(ROCS['uBoost']['x_data'],
+                       ROCS['uBoost']['y_data'],
+                       fill_value="extrapolate"
                        )
-        plt.xlim(-0.05, 1.05)
-        plt.minorticks_on()
-plt.savefig('reports/figures/AugmentTrainingSig.pdf',
+    dist = interp1d(AllMets['uBoost']['efficiencies'],
+                    AllMets['uBoost']['BhatD'])
+    uboost, = plt.plot(backrej(AllMets['uBoost']['efficiencies']),
+                       dist(AllMets['uBoost']['efficiencies']),
+                       color=Uboost_color,
+                       ls='--'
+                       )
+    plt.scatter(backrej(0.5), dist(0.5), marker='*', s=25, color=Uboost_color, zorder=10)
+    plt.scatter(backrej(0.25), dist(0.25), marker='s', s=25, color=Uboost_color, zorder=10)
+    plt.scatter(backrej(0.75), dist(0.75), marker='o', s=25, color=Uboost_color, zorder=10)
+
+    for i, lam in enumerate(lambdas_to_use):
+        lam_name = '{0:03d}'.format(lam)
+        print(i, lam, lam_name)
+        backrej = interp1d(ROCS['AdversaryLambda_' + lam_name]['x_data'],
+                           ROCS['AdversaryLambda_' + lam_name]['y_data'],
+                           fill_value="extrapolate"
+                           )
+        dist = interp1d(AllMets['AdversaryLambda_' + lam_name]['efficiencies'],
+                        AllMets['AdversaryLambda_' + lam_name]['BhatD'])
+        lamplt, = plt.plot(backrej(AllMets['AdversaryLambda_' + lam_name]['efficiencies']),
+                           dist(AllMets['AdversaryLambda_' + lam_name]['efficiencies']),
+                           color='C4',  # ADV_Colors9[i],
+                           label=r'$\lambda=$' + '{0}'.format(lam)
+                           )
+        lam_plt_dict[lam] = lamplt
+        plt.scatter(backrej(0.5), dist(0.5), marker='*', s=25, color='C4', zorder=10)
+        plt.scatter(backrej(0.25), dist(0.25), marker='s', s=25, color='C4', zorder=10)
+        plt.scatter(backrej(0.75), dist(0.75), marker='o', s=25, color='C4', zorder=10)
+
+    nn, = plt.plot([], [], color='k', label='NN')
+    gbc, = plt.plot([], [], color='k', ls='--', label='BDT')
+
+    backrej = interp1d(ROCS['TauSubjettiness']['x_data'],
+                       ROCS['TauSubjettiness']['y_data'],
+                       fill_value="extrapolate"
+                       )
+    dist = interp1d(AllMets['TauSubjettiness']['efficiencies'],
+                    AllMets['TauSubjettiness']['BhatD'])
+    taunn, = plt.plot(backrej(AllMets['TauSubjettiness']['efficiencies']),
+                      dist(AllMets['TauSubjettiness']['efficiencies']),
+                      color='hotpink',
+                      ls=':'
+                      )
+    plt.scatter(backrej(0.5), dist(0.5), marker='*', s=25, color='hotpink', zorder=10)
+    plt.scatter(backrej(0.25), dist(0.25), marker='s', s=25, color='hotpink', zorder=10)
+    plt.scatter(backrej(0.75), dist(0.75), marker='o', s=25, color='hotpink', zorder=10)
+
+    if prong == 2:
+        backrej = interp1d(ROCS['TauDDT']['x_data'],
+                           ROCS['TauDDT']['y_data'],
+                           fill_value="extrapolate"
+                           )
+        dist = interp1d(AllMets['TauDDT']['efficiencies'],
+                        AllMets['TauDDT']['BhatD'])
+        taunnddt, = plt.plot(backrej(AllMets['TauDDT']['efficiencies']),
+                             dist(AllMets['TauDDT']['efficiencies']),
+                             color='purple',
+                             ls=':'
+                             )
+        plt.scatter(backrej(0.5), dist(0.5), marker='*', s=25, color='purple', zorder=10)
+        plt.scatter(backrej(0.25), dist(0.25), marker='s', s=25, color='purple', zorder=10)
+        plt.scatter(backrej(0.75), dist(0.75), marker='o', s=25, color='purple', zorder=10)
+
+    plt.title('{0}-prong'.format(prong))
+    if prong == 2:
+        plt.ylabel('Bhattacharyya distance')
+        # plt.ylabel('Bhat. Dist.')
+        # plt.legend([lam_plt_dict[50], ubst, bsnn],  # ,
+        #            ['Adv. NN.', 'uBoost', 'Orig. NN.'],
+        #            fontsize=10,
+        #            frameon=True,
+        #            loc='upper right',
+        #            labelspacing=0.1
+        #            )
+        plt.legend([bsnn, ubst, lam_plt_dict[50], taunn, taunnddt],
+                   ['Original', 'uBoost', 'Adv.', r'$\tau_N/\tau_{N-1}$',
+                    r'$\tau_{21}^{\prime}$'
+                    ],
+                   fontsize=10,
+                   frameon=False,
+                   loc='upper right',
+                   labelspacing=0.15,
+                   columnspacing=1,
+                   handlelength=1.5,
+                   ncol=2
+                   )
+        ax.annotate("Better",
+                    ha='center',
+                    fontsize=10,
+                    xy=(1e3, 0.),
+                    xytext=(1e3, 0.35),
+                    rotation=90,
+                    arrowprops=dict(arrowstyle="->")
+                    )
+        ax.annotate("Better",
+                    va='center',
+                    fontsize=10,
+                    xy=(1e3, 0.),
+                    xytext=(1e2, 0.0),
+                    arrowprops=dict(arrowstyle="->")
+                    )
+        plt.xlim(2e3, 0.8)
+    elif prong == 3:
+        plt.legend([nn, gbc, singlevar],
+                   ['NN', 'BDT', 'Single Variable'],
+                   fontsize=10,
+                   frameon=False,
+                   )
+        plt.xlim(2e3, 0.8)
+    if prong == 4:
+        eff50 = plt.scatter([], [], marker='*', s=25, color='k', zorder=10)
+        eff25 = plt.scatter([], [], marker='s', s=25, color='k', zorder=10)
+        eff75 = plt.scatter([], [], marker='o', s=25, color='k', zorder=10)
+        plt.legend([eff75, eff50, eff25],
+                   [r'$\epsilon_{S} = 0.75$',
+                    r'$\epsilon_{S} = 0.50$',
+                    r'$\epsilon_{S} = 0.25$'
+                    ],
+                   frameon=False,
+                   fontsize=10,
+                   loc='upper right'
+                   )
+plt.savefig('reports/figures/AugmentedTrainingBackgroundRejectionVersusDistance.pdf',
             bbox_inches='tight')
+#
+# # *********** q0 ***********
+# plt.figure(figsize=(8.5, 7.5))
+# gs0 = gs.GridSpec(3, 3, wspace=0.05, hspace=0.05)
+# for prong in [2, 3, 4]:
+#     with open(data_dir + 'Metrics_{0}p.p'.format(prong), 'rb') as fin:
+#         AllMets = pickle.load(fin)
+# #
+#     ax_dict = {}
+#     titles = ['1% uncertainty', '10% uncertainty', '50% uncertainty']
+#     for i, metric in enumerate(['q0_0.01', 'q0_0.1', 'q0_0.5']):
+#         if i == 0:
+#             ax0 = plt.subplot(gs0[(prong - 2) * 3])
+#         else:
+#             ax = plt.subplot(gs0[(prong - 2) * 3 + i], sharey=ax0)
+#         # print(np.sqrt(AllMets['AdversaryLambda_' + lam_name][metric]))
+#         xspace = np.linspace(0.05, 1, 50)
+#         # for j, lam in enumerate(lambdas_to_use):
+#         #     lam_name = '{0:03d}'.format(lam)
+#         #     effarray = np.array(AllMets['AdversaryLambda_' + lam_name]['efficiencies'])
+#         #     qoarray = np.array(np.sqrt(AllMets['AdversaryLambda_' + lam_name][metric]))
+#         #     q0interp = interp1d(effarray[~np.isinf(qoarray)],
+#         #                         qoarray[~np.isinf(qoarray)],
+#         #                     fill_value=[0],
+#         #                     bounds_error=False
+#         #                     )
+#         #     plt.plot(xspace, q0interp(xspace), color=ADV_Colors9[j])
+#
+#         effarray = np.array(AllMets['uBoost']['efficiencies'])
+#         qoarray = np.array(np.sqrt(AllMets['uBoost'][metric]))
+#         q0interp = interp1d(effarray[~np.isinf(qoarray)],
+#                             qoarray[~np.isinf(qoarray)],
+#                         fill_value=[0],
+#                         bounds_error=False
+#                         )
+#         plt.plot(xspace, q0interp(xspace), color=Uboost_color, ls='--', lw=1.5)
+#
+#         effarray = np.array(AllMets['BaseNeuralNetwork']['efficiencies'])
+#         qoarray = np.array(np.sqrt(AllMets['BaseNeuralNetwork'][metric]))
+#         q0interp = interp1d(effarray[~np.isinf(qoarray)],
+#                             qoarray[~np.isinf(qoarray)],
+#                         fill_value=[0],
+#               bounds_error=False
+#                             )
+#         plt.plot(xspace,
+#                  q0interp(xspace),
+#                  color='C2'
+#                  )
+#
+#         if i != 0:
+#             plt.setp(ax.get_yticklabels(), visible=False)
+#         else:
+#             plt.ylabel(r'$\sqrt{q_0}$')
+#         if prong == 4:
+#             plt.xlabel('Signal Efficiency')
+#         else:
+#             if i == 0:
+#                 plt.setp(ax0.get_xticklabels(), visible=False)
+#             else:
+#                 plt.setp(ax.get_xticklabels(), visible=False)
+#         if prong == 2:
+#             plt.title(titles[i])
+#         if i == 2 and prong == 2:
+#             plt.ylim(0.5, 3)
+#         if i == 0 and prong == 2:
+#             plt.text(0.5, 0.65, '2-prong signal', ha='center', va='bottom')
+#         if i == 2 and prong == 3:
+#             plt.ylim(1, 7.2)
+#         if i == 0 and prong == 3:
+#             plt.text(0.5, 1.4, '3-prong signal', ha='center', va='bottom')
+#         if i == 2 and prong == 4:
+#             plt.ylim(1, 16.2)
+#         if i == 0 and prong == 4:
+#             plt.text(0.6, 1.8, '4-prong signal', ha='center', va='bottom')
+#         # if i == 2 and prong == 3:
+#         #     plt.legend([lam_plt_dict[x] for x in lambdas_to_use[::-1]],
+#         #                [str(x) for x in lambdas_to_use[::-1]],
+#         #                fontsize=10,
+#         #                frameon=False,
+#         #                ncol=2,
+#         #                loc='upper right',
+#         #                columnspacing=1,
+#         #                handlelength=1.2,
+#         #                title=r'Adversary $\lambda$',
+#         #                title_fontsize=10,
+#         #                labelspacing=0.1
+#         #                )
+#         if i == 2 and prong == 2:
+#             plt.legend([ubst, bsnn],  #lam_plt_dict[5],
+#                        ['Adv. NN.', 'uBoost', 'Orig. NN.'],
+#                        fontsize=10,
+#                        frameon=False,
+#                        loc='upper right',
+#                        labelspacing=0.1
+#                        )
+#         plt.xlim(-0.05, 1.05)
+#         plt.minorticks_on()
+# plt.savefig('reports/figures/AugmentTrainingSig.pdf',
+#             bbox_inches='tight')
