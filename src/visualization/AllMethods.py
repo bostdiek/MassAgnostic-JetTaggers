@@ -40,10 +40,10 @@ MyColors = [  # 'C0', 'C0', 'hotpink',
             ]
 LegendLabels = [  # 'NN', 'BDT', r'$\tau_{N}/\tau_{N-1}$',
                 'uBoost', 'Adv',
-                'PCA', 'Planed', r'$\tau_{21}^{\prime}$'
+                'PCA', 'Planed', r'$\tau_{21}^{\rm{DDT}}$'
                 ]
-plt.figure(figsize=(8.5, 2.5))
-gs0 = gs.GridSpec(1, 3, wspace=0.1)
+plt.figure(figsize=(8.5, 5.7))
+gs0 = gs.GridSpec(2, 3, wspace=0.1, hspace=0.35)
 
 # axesdict = {2: plt.subplot(gs0[0]),
 #             3: plt.subplot(gs0[1], sharey=ax0),
@@ -51,10 +51,10 @@ gs0 = gs.GridSpec(1, 3, wspace=0.1)
 #             }
 for prong in [2, 3, 4]:
     if prong == 2:
-        ax = plt.subplot(gs0[prong - 2])
+        ax = plt.subplot(gs0[prong + 1])
         plt.ylabel('Bhattacharyya Distance')
     else:
-        ax1 = plt.subplot(gs0[prong - 2])  #,
+        ax1 = plt.subplot(gs0[prong + 1])  #,
                           # sharey=ax)
         plt.setp(ax1.get_yticklabels(), visible=False)
         plt.xlim(2e4, 0.8)
@@ -90,29 +90,29 @@ for prong in [2, 3, 4]:
         plt.scatter(backrej(0.25), dist(0.25), marker='s', s=25, color=color, zorder=10)
         plt.scatter(backrej(0.75), dist(0.75), marker='o', s=25, color=color, zorder=10)
 
-    plt.title('{0}-prong'.format(prong))
+    # plt.title('{0}-prong'.format(prong))
     if prong == 2:
         for color, label, ls in zip(MyColors, LegendLabels, LS):
             plt.plot([], [], color=color, label=label, ls=ls)
-        plt.legend(frameon=True,
-                   fontsize=10,
-                   loc='upper center',
-                   ncol=2,
-                   columnspacing=1,
-                   labelspacing=0.15)
+        # plt.legend(frameon=True,
+        #            fontsize=10,
+        #            loc='upper center',
+        #            ncol=2,
+        #            columnspacing=1,
+        #            labelspacing=0.15)
         ax.annotate("Better",
                     ha='center',
                     fontsize=10,
-                    xy=(1e3, 0.),
-                    xytext=(1e3, 0.35),
+                    xy=(7.5e2, 0.06),
+                    xytext=(7.5e2, 0.42),
                     rotation=90,
                     arrowprops=dict(arrowstyle="->")
                     )
         ax.annotate("Better",
                     va='center',
                     fontsize=10,
-                    xy=(1e3, 0.),
-                    xytext=(1e2, 0.0),
+                    xy=(7e2, 0.05),
+                    xytext=(1e2, 0.05),
                     arrowprops=dict(arrowstyle="->")
                     )
         plt.xlim(2e3, 0.8)
@@ -127,12 +127,13 @@ for prong in [2, 3, 4]:
                     r'$\epsilon_{S} = 0.50$',
                     r'$\epsilon_{S} = 0.25$'
                     ],
-                   frameon=False,
+                   frameon=True,
                    fontsize=10,
                    loc='upper right'
                    )
-plt.savefig('reports/figures/AllMethodsBackgroundRejectionVersusDistance.pdf', bbox_inches='tight')
-plt.close()
+    plt.grid()
+# plt.savefig('reports/figures/AllMethodsBackgroundRejectionVersusDistance.pdf', bbox_inches='tight')
+# plt.close()
 
 # ************************************
 # Bhattacharyya distance
@@ -140,8 +141,8 @@ plt.close()
 lam_plt_dict = {}
 lambdas_to_use = [50]
 Uboost_color = 'blue'
-plt.figure(figsize=(8.5, 2.5))
-gs0 = gs.GridSpec(1, 3, wspace=0.1,)
+# plt.figure(figsize=(8.5, 2.5))
+# gs0 = gs.GridSpec(1, 3, wspace=0.1,)
 for prong in [2, 3, 4]:
 
     with open(data_dir + 'Metrics_{0}p.p'.format(prong), 'rb') as fin:
@@ -182,7 +183,7 @@ for prong in [2, 3, 4]:
                    labelspacing=0.15)
 
 
-plt.savefig('reports/figures/AllMethodsBhat.pdf',
+plt.savefig('reports/figures/AllMethodsBhat_Both.pdf',
             bbox_inches='tight')
 plt.clf()
 plt.close()
