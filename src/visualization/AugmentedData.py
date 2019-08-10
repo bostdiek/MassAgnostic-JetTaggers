@@ -225,10 +225,11 @@ for prong in [2, 3, 4]:
         plt.legend([Patch(facecolor='C0',
                           label='Original'),
                     Patch(facecolor='C3',
-                                      label='PCA'),
+                          label='PCA'),
                     Patch(facecolor='C2',
-                                      label='Planed'), taunn, taunnddt],
-                   ['Original', 'PCA', 'Planed', r'$\tau_N / \tau_{N-1}$', r'$\tau_{21}^{\rm{DDT}}$'],
+                          label='Planed'), taunn, taunnddt],
+                   ['Original', 'PCA', 'Planed', r'$\tau_N / \tau_{N-1}$',
+                    r'$\tau_{21}^{\rm{DDT}}$'],
                    fontsize=10,
                    frameon=True,
                    labelspacing=0.15
@@ -310,9 +311,9 @@ for prong in [2, 3, 4]:
         plt.legend([Patch(facecolor='C0',
                           label='Original'),
                     Patch(facecolor='C3',
-                                      label='PCA'),
+                          label='PCA'),
                     Patch(facecolor='C2',
-                                      label='Planed'), taunn, taunnddt],
+                          label='Planed'), taunn, taunnddt],
                    ['Original', 'PCA', 'Planed', r'$\tau_N / \tau_{N-1}$',
                     r'$\tau_{21}^{\rm{DDT}}$'],
                    fontsize=10,
@@ -479,8 +480,7 @@ for prong in [2, 3, 4]:
         ax = plt.subplot(gs0[prong - 2])
         plt.ylabel('Bhattacharyya Distance')
     else:
-        ax1 = plt.subplot(gs0[prong - 2])  #,
-                          # sharey=ax)
+        ax1 = plt.subplot(gs0[prong - 2])
         plt.setp(ax1.get_yticklabels(), visible=False)
         plt.xlim(2e4, 0.8)
     plt.xlabel('Background Rejection')
@@ -628,9 +628,12 @@ for prong in [2, 3, 4]:
                              color='purple',
                              ls=':'
                              )
-        plt.scatter(backrej(0.5), dist(0.5), marker='*', s=25, color='purple', zorder=10)
-        plt.scatter(backrej(0.25), dist(0.25), marker='s', s=25, color='purple', zorder=10)
-        plt.scatter(backrej(0.75), dist(0.75), marker='o', s=25, color='purple', zorder=10)
+        plt.scatter(backrej(0.5), dist(0.5), marker='*', s=25, color='purple',
+                    zorder=10)
+        plt.scatter(backrej(0.25), dist(0.25), marker='s', s=25, color='purple',
+                    zorder=10)
+        plt.scatter(backrej(0.75), dist(0.75), marker='o', s=25, color='purple',
+                    zorder=10)
 
     plt.title('{0}-prong'.format(prong))
     if prong == 2:
@@ -642,9 +645,9 @@ for prong in [2, 3, 4]:
         plt.legend([Patch(facecolor='C0',
                           label='Original'),
                     Patch(facecolor='C3',
-                                      label='PCA'),
+                          label='PCA'),
                     Patch(facecolor='C2',
-                                      label='Planed'),
+                          label='Planed'),
                     taunn, taunnddt],
                    ['Original', 'PCA', 'Planed', r'$\tau_N / \tau_{N-1}$',
                     r'$\tau_{21}^{\rm{DDT}}$'],
