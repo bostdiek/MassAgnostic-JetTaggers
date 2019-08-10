@@ -2,6 +2,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gs
+from matplotlib.patches import Patch
 import numpy as np
 from pathlib import Path
 import pickle
@@ -71,7 +72,7 @@ plt.plot(ROC_2p['PlanedNeuralNetwork']['x_data'],
 # plt.legend(frameon=False, fontsize=12, loc=(0.3, 0.4))
 plt.plot(ROC_2p['TauDDT']['x_data'],
          ROC_2p['TauDDT']['y_data'],
-         label=r'$\tau_{21}^{\prime}$',
+         label=r'$\tau_{21}^{\rm{DDT}}$',
          color='purple',
          ls=':'
          )
@@ -80,7 +81,7 @@ plt.legend(frameon=False, fontsize=10,
            labelspacing=0.15
            )
 # plt.legend(frameon=False, fontsize=10, loc=(0.5, -0.75), ncol=3)
-plt.text(0.5, 6e3, '2-Prong Signal', ha='center', va='top')
+plt.text(0.5, 6e3, '2-prong signal', ha='center', va='top')
 plt.minorticks_on()
 print('AUC NN (base) = {0:0.3f}'.format(ROC_2p['BaseNeuralNetwork']['auc']))
 print('AUC NN (PCA ) = {0:0.3f}'.format(ROC_2p['PCANeuralNetwork']['auc']))
@@ -152,7 +153,7 @@ for i, eff in enumerate(plot_keys):
              bins=35,
              color=mycolors[i]
              )
-plt.text(450 / 2, 7e3, r'$\tau_{21}^{\prime}$',
+plt.text(450 / 2, 7e3, r'$\tau_{21}^{\rm{DDT}}$',
          fontsize=12, ha='center', va='top')
 plt.hist(hists[1][0], range=(50, 400),
          bins=35,
@@ -178,18 +179,18 @@ for prong in [2, 3, 4]:
     # xr = np.linspace(1e-5, 1, 100)
     # plt.fill_between(xr, 1/xr, where=1/xr>0, color='grey')
 
-    base, = plt.plot(ROCS['BaseNeuralNetwork']['x_data'],
-                     ROCS['BaseNeuralNetwork']['y_data'],
-                     color='C0'
-                     )
-    pca, = plt.plot(ROCS['PCANeuralNetwork']['x_data'],
-                    ROCS['PCANeuralNetwork']['y_data'],
-                    color='C3'
-                    )
-    planed, = plt.plot(ROCS['PlanedNeuralNetwork']['x_data'],
-                       ROCS['PlanedNeuralNetwork']['y_data'],
-                       color='C2'
-                       )
+    plt.plot(ROCS['BaseNeuralNetwork']['x_data'],
+             ROCS['BaseNeuralNetwork']['y_data'],
+             color='C0'
+             )
+    plt.plot(ROCS['PCANeuralNetwork']['x_data'],
+             ROCS['PCANeuralNetwork']['y_data'],
+             color='C3'
+             )
+    plt.plot(ROCS['PlanedNeuralNetwork']['x_data'],
+             ROCS['PlanedNeuralNetwork']['y_data'],
+             color='C2'
+             )
     taunn, = plt.plot(ROCS['TauSubjettiness']['x_data'],
                       ROCS['TauSubjettiness']['y_data'],
                       color='hotpink',
@@ -221,15 +222,20 @@ for prong in [2, 3, 4]:
     if prong == 2:
         plt.ylabel('Background Rejection')
         # plt.ylabel('Bhat. Dist.')
-        plt.legend([base, pca, planed, taunn, taunnddt],
-                   ['Original', 'PCA', 'Planed', r'$\tau_N / \tau_{N-1}$', r'$\tau_{21}^{\prime}$'],
+        plt.legend([Patch(facecolor='C0',
+                          label='Original'),
+                    Patch(facecolor='C3',
+                                      label='PCA'),
+                    Patch(facecolor='C2',
+                                      label='Planed'), taunn, taunnddt],
+                   ['Original', 'PCA', 'Planed', r'$\tau_N / \tau_{N-1}$', r'$\tau_{21}^{\rm{DDT}}$'],
                    fontsize=10,
                    frameon=True,
                    labelspacing=0.15
                    )
     elif prong == 3:
-        plt.legend([nn, gbc, singlevar],
-                   ['NN', 'BDT', 'Single Variable'],
+        plt.legend([nn, gbc],  # , singlevar],
+                   ['NN', 'BDT'],  # , 'Single Variable'],
                    fontsize=10,
                    frameon=True,
                    )
@@ -261,18 +267,18 @@ for prong in [2, 3, 4]:
     ax2 = plt.subplot(gs0[prong - 2])
     plt.xlabel('Signal Efficiency')
 
-    base, = plt.plot(AllMets['BaseNeuralNetwork']['efficiencies'],
-                     AllMets['BaseNeuralNetwork']['BhatD'],
-                     color='C0'
-                     )
-    pca, = plt.plot(AllMets['PCANeuralNetwork']['efficiencies'],
-                    AllMets['PCANeuralNetwork']['BhatD'],
-                    color='C3'
-                    )
-    planed, = plt.plot(AllMets['PlanedNeuralNetwork']['efficiencies'],
-                       AllMets['PlanedNeuralNetwork']['BhatD'],
-                       color='C2'
-                       )
+    plt.plot(AllMets['BaseNeuralNetwork']['efficiencies'],
+             AllMets['BaseNeuralNetwork']['BhatD'],
+             color='C0'
+             )
+    plt.plot(AllMets['PCANeuralNetwork']['efficiencies'],
+             AllMets['PCANeuralNetwork']['BhatD'],
+             color='C3'
+             )
+    plt.plot(AllMets['PlanedNeuralNetwork']['efficiencies'],
+             AllMets['PlanedNeuralNetwork']['BhatD'],
+             color='C2'
+             )
     taunn, = plt.plot(AllMets['TauSubjettiness']['efficiencies'],
                       AllMets['TauSubjettiness']['BhatD'],
                       color='hotpink',
@@ -299,18 +305,23 @@ for prong in [2, 3, 4]:
              color='C2', ls='--'
              )
     if prong == 2:
-        plt.ylabel('Bhattacharyya distance')
+        plt.ylabel('Bhattacharyya Distance')
         # plt.ylabel('Bhat. Dist.')
-        plt.legend([base, pca, planed, taunn, taunnddt],
+        plt.legend([Patch(facecolor='C0',
+                          label='Original'),
+                    Patch(facecolor='C3',
+                                      label='PCA'),
+                    Patch(facecolor='C2',
+                                      label='Planed'), taunn, taunnddt],
                    ['Original', 'PCA', 'Planed', r'$\tau_N / \tau_{N-1}$',
-                    r'$\tau_{21}^{\prime}$'],
+                    r'$\tau_{21}^{\rm{DDT}}$'],
                    fontsize=10,
                    frameon=True,
                    labelspacing=0.15
                    )
     elif prong == 3:
-        plt.legend([nn, gbc, singlevar],
-                   ['NN', 'BDT', 'Single Variable'],
+        plt.legend([nn, gbc],  # , singlevar],
+                   ['NN', 'BDT'],  # , 'Single Variable'],
                    fontsize=10,
                    frameon=True)
         plt.setp(ax2.get_yticklabels(), visible=False)
@@ -623,11 +634,20 @@ for prong in [2, 3, 4]:
 
     plt.title('{0}-prong'.format(prong))
     if prong == 2:
-        plt.ylabel('Bhattacharyya distance')
+        plt.ylabel('Bhattacharyya Distance')
         # plt.ylabel('Bhat. Dist.')
-        plt.legend([base, pca, planed, taunn, taunnddt],
+        base = plt.scatter([], [], color='C0', marker='s')
+        pca = plt.scatter([], [], color='C3', marker='s')
+        planed = plt.scatter([], [], color='C2', marker='s')
+        plt.legend([Patch(facecolor='C0',
+                          label='Original'),
+                    Patch(facecolor='C3',
+                                      label='PCA'),
+                    Patch(facecolor='C2',
+                                      label='Planed'),
+                    taunn, taunnddt],
                    ['Original', 'PCA', 'Planed', r'$\tau_N / \tau_{N-1}$',
-                    r'$\tau_{21}^{\prime}$'],
+                    r'$\tau_{21}^{\rm{DDT}}$'],
                    fontsize=10,
                    frameon=False,
                    labelspacing=0.15,
@@ -652,8 +672,8 @@ for prong in [2, 3, 4]:
                     )
         plt.xlim(2e3, 0.8)
     if prong == 3:
-        plt.legend([nn, gbc, singlevar],
-                   ['NN', 'BDT', 'Single Variable'],
+        plt.legend([nn, gbc],  # , singlevar],
+                   ['NN', 'BDT'],  # , 'Single Variable'],
                    fontsize=10,
                    frameon=False)
         plt.xlim(2e3, 0.8)
