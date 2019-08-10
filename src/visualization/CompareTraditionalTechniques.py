@@ -52,7 +52,7 @@ for prong in [2]:
     plt.plot(ROC_2p['GradientBoostingClassifier']['x_data'],
              ROC_2p['GradientBoostingClassifier']['y_data'],
              label='BDT',
-             color='C0',
+             color='C1',
              ls='--'
              )
     # plt.legend(frameon=False, fontsize=12, loc=(0.3, 0.4))
@@ -66,7 +66,7 @@ for prong in [2]:
                loc=(0.4, 0.45),
                labelspacing=0.15)
     # plt.legend(frameon=False, fontsize=10, loc=(0.5, -0.75), ncol=3)
-    plt.text(0.5, 6e3, '{0}-Prong Signal'.format(prong), ha='center', va='top')
+    plt.text(0.5, 6e3, '{0}-prong signal'.format(prong), ha='center', va='top')
     plt.minorticks_on()
     print('AUC NN = {0:0.3f}'.format(ROC_2p['BaseNeuralNetwork']['auc']))
     print('AUC BDT = {0:0.3f}'.format(ROC_2p['GradientBoostingClassifier']['auc']))
@@ -206,7 +206,7 @@ for prong in [2]:
 #          label='GBC: ' + '{0:.3f}'.format(ROC_2p['GradientBoostingClassifier']['auc'])
 #          )
 # plt.legend(frameon=False, fontsize=12, loc=(0.18, 0.55))
-# plt.text(0.5, 6e3, '2-Prong Signal', ha='center', va='top')
+# plt.text(0.5, 6e3, '2-prong signal', ha='center', va='top')
 # plt.minorticks_on()
 #
 # gs1 = gs.GridSpecFromSubplotSpec(1, 2, gs0[1], wspace=0.1)
