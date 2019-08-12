@@ -2,6 +2,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gs
+from matplotlib.patches import Patch
 import numpy as np
 from pathlib import Path
 import pickle
@@ -83,7 +84,13 @@ for prong in [2, 3, 4]:
     if prong == 2:
         plt.ylabel('Bhattacharyya Distance')
         # plt.ylabel('Bhat. Dist.')
-        plt.legend([base, pca, planed, taunn, taunnddt],
+        plt.legend([Patch(facecolor='C0',
+                          label='Original'),
+                    Patch(facecolor='C3',
+                          label='PCA'),
+                    Patch(facecolor='C2',
+                          label='Planed'),
+                    taunn, taunnddt],
                    ['Original', 'PCA', 'Planed', r'$\tau_N / \tau_{N-1}$',
                     r'$\tau_{21}^{\rm{DDT}}$'],
                    fontsize=10,
