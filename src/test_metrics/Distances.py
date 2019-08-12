@@ -6,6 +6,7 @@ Computes the Bhattacharyya distance metric
 """
 
 import numpy as np
+from scipy.stats import entropy
 
 
 def BhatDist(hist_1, hist_2):
@@ -37,25 +38,6 @@ def BhatDist(hist_1, hist_2):
     return db  # , dist_e
 
 
-def KL(hist_1, hist_2):
-    '''
-    hist_1: before cuts
-    hist_2: after cuts
-    '''
-    assert len(hist_1) == len(hist_2)
-    # normalize
-    hist_1 = hist_1 / np.sum(hist_1)
-    hist_2 = hist_2 / np.sum(hist_2)
-    # compute
-    div = np.divide(hist_1,
-                    hist_2,
-                    out=np.ones_like(hist_1),
-                    where=(hist_2 != 0)
-                    )
-    kl = -np.log(np.sum(hist_1 * div))
-    return kl
-
-
 def JS_Distance(hist_1, hist_2):
     '''
     Inputs:
@@ -66,6 +48,10 @@ def JS_Distance(hist_1, hist_2):
     '''
     assert len(hist_1) == len(hist_2)
 
-    fact_1 = KL(hist_1, 0.5 * (hist_1 + hist_2))
-    fact_2 = KL(0.5 * (hist_1 + hist_2), hist_2)
-    return np.sqrt(0.5 * (fact_1 + fact_2))
+    # Normalize
+    hist_1 /= np.sum(hist_1)
+    hist_2 /= np.sum(hist_2)
+    m = (hist_1 + hist_2) / 2
+
+    js = np.sqrt((entropy(hist_1, m) + entropy(hist_2, m)) / 2)
+    return js
