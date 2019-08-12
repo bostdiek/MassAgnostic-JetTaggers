@@ -313,7 +313,8 @@ for prong in [2, 3, 4]:
                     Patch(facecolor='C3',
                           label='PCA'),
                     Patch(facecolor='C2',
-                          label='Planed'), taunn, taunnddt],
+                          label='Planed'),
+                    taunn, taunnddt],
                    ['Original', 'PCA', 'Planed', r'$\tau_N / \tau_{N-1}$',
                     r'$\tau_{21}^{\rm{DDT}}$'],
                    fontsize=10,
@@ -341,140 +342,10 @@ plt.savefig('reports/figures/AugmentDataBhat.pdf',
 plt.clf()
 plt.close()
 
-# *********** q0 ***********
-# plt.figure(figsize=(8.5, 7.5))
-# gs0 = gs.GridSpec(3, 3, wspace=0.05, hspace=0.05)
-# for prong in [2, 3, 4]:
-#     with open(data_dir + 'Metrics_{0}p.p'.format(prong), 'rb') as fin:
-#         AllMets = pickle.load(fin)
-#
-#     ax_dict = {}
-#     titles = ['1% uncertainty', '10% uncertainty', '50% uncertainty']
-#     for i, metric in enumerate(['q0_0.01', 'q0_0.1', 'q0_0.5']):
-#         if i == 0:
-#             ax0 = plt.subplot(gs0[(prong - 2) * 3])
-#         else:
-#             ax = plt.subplot(gs0[(prong - 2) * 3 + i], sharey=ax0)
-#         print(np.sqrt(AllMets['BaseNeuralNetwork'][metric]))
-#         xspace = np.linspace(0.05, 1, 50)
-#         effarray = np.array(AllMets['BaseNeuralNetwork']['efficiencies'])
-#         qoarray = np.array(np.sqrt(AllMets['BaseNeuralNetwork'][metric]))
-#         q0interp = interp1d(effarray[~np.isinf(qoarray)],
-#                             qoarray[~np.isinf(qoarray)],
-#                         fill_value=[0],
-#               bounds_error=False
-#                             )
-#         plt.plot(xspace,
-#                  q0interp(xspace),
-#                  color='C2'
-#                  )
-#
-#         effarray = np.array(AllMets['PCANeuralNetwork']['efficiencies'])
-#         qoarray = np.array(np.sqrt(AllMets['PCANeuralNetwork'][metric]))
-#         q0interp = interp1d(effarray[~np.isinf(qoarray)],
-#                             qoarray[~np.isinf(qoarray)],
-#                         fill_value=[0],
-#               bounds_error=False
-#                             )
-#         plt.plot(xspace,
-#                  q0interp(xspace),
-#                  color='C3'
-#                  )
-#
-#         effarray = np.array(AllMets['PlanedNeuralNetwork']['efficiencies'])
-#         qoarray = np.array(np.sqrt(AllMets['PlanedNeuralNetwork'][metric]))
-#         q0interp = interp1d(effarray[~np.isinf(qoarray)],
-#                             qoarray[~np.isinf(qoarray)],
-#                         fill_value=[0],
-#               bounds_error=False
-#                             )
-#         plt.plot(xspace,
-#                  q0interp(xspace),
-#                  color='C4'
-#                  )
-#
-#         effarray = np.array(AllMets['GradientBoostingClassifier']['efficiencies'])
-#         qoarray = np.array(np.sqrt(AllMets['GradientBoostingClassifier'][metric]))
-#         q0interp = interp1d(effarray[~np.isinf(qoarray)],
-#                             qoarray[~np.isinf(qoarray)],
-#                             fill_value=[0],
-#                             bounds_error=False
-#                             )
-#         plt.plot(xspace, q0interp(xspace),
-#                  color='C2', ls=':'
-#                  )
-#
-#         effarray = np.array(AllMets['PCAGBC']['efficiencies'])
-#         qoarray = np.array(np.sqrt(AllMets['PCAGBC'][metric]))
-#         q0interp = interp1d(effarray[~np.isinf(qoarray)],
-#                             qoarray[~np.isinf(qoarray)],
-#                         fill_value=[0],
-#               bounds_error=False
-#                             )
-#         plt.plot(xspace, q0interp(xspace),
-#                  color='C3', ls=':'
-#                  )
-#
-#         effarray = np.array(AllMets['PlanedGBC']['efficiencies'])
-#         qoarray = np.array(np.sqrt(AllMets['PlanedGBC'][metric]))
-#         q0interp = interp1d(effarray[~np.isinf(qoarray)],
-#                             qoarray[~np.isinf(qoarray)],
-#                         fill_value=[0],
-#               bounds_error=False
-#                             )
-#         plt.plot(xspace, q0interp(xspace),
-#                  color='C4', ls=':'
-#                  )
-#         if i != 0:
-#             plt.setp(ax.get_yticklabels(), visible=False)
-#         else:
-#             plt.ylabel(r'$\sqrt{q_0}$')
-#         if prong == 4:
-#             plt.xlabel('Signal Efficiency')
-#         else:
-#             if i == 0:
-#                 plt.setp(ax0.get_xticklabels(), visible=False)
-#             else:
-#                 plt.setp(ax.get_xticklabels(), visible=False)
-#         if prong == 2:
-#             plt.title(titles[i])
-#         if i == 2 and prong == 2:
-#             plt.ylim(0.5, 3)
-#         if i == 0 and prong == 2:
-#             plt.text(0.5, 0.65, '2-prong signal', ha='center', va='bottom')
-#         if i == 2 and prong == 3:
-#             plt.ylim(1, 7.2)
-#         if i == 0 and prong == 3:
-#             plt.text(0.5, 1.4, '3-prong signal', ha='center', va='bottom')
-#         if i == 2 and prong == 4:
-#             plt.ylim(1, 16.2)
-#         if i == 0 and prong == 4:
-#             plt.text(0.5, 1.8, '4-prong signal', ha='center', va='bottom')
-#         if i == 2 and prong == 2:
-#             plt.legend([base, pca, planed],
-#                        ['Original', 'PCA', 'Planed'],
-#                        fontsize=10,
-#                        frameon=False
-#                        )
-#         if i == 1 and prong == 2:
-#             plt.legend([nn, gbc],
-#                        ['NN', 'GBC'],
-#                        fontsize=10,
-#                        frameon=False)
-#         plt.xlim(-0.05, 1.05)
-#         plt.minorticks_on()
-# plt.savefig('reports/figures/AugmentDataSig.pdf',
-#             bbox_inches='tight')
-
-
 # *********** Background rejection versus Distance ***********
 plt.figure(figsize=(8.5, 2.5))
 gs0 = gs.GridSpec(1, 3, wspace=0.1)
 
-# axesdict = {2: plt.subplot(gs0[0]),
-#             3: plt.subplot(gs0[1], sharey=ax0),
-#             4: plt.subplot(gs0[2], sharey=ax0)
-#             }
 for prong in [2, 3, 4]:
     if prong == 2:
         ax = plt.subplot(gs0[prong - 2])
