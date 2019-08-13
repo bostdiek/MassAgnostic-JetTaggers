@@ -291,9 +291,9 @@ for prong in [2, 3, 4]:
         eff25 = plt.scatter([], [], marker='s', s=25, color='k', zorder=10)
         eff75 = plt.scatter([], [], marker='o', s=25, color='k', zorder=10)
         plt.legend([eff75, eff50, eff25],
-                   [r'$\epsilon_{S} = 0.75$',
-                    r'$\epsilon_{S} = 0.50$',
-                    r'$\epsilon_{S} = 0.25$'
+                   [r'$\varepsilon_{S} = 0.75$',
+                    r'$\varepsilon_{S} = 0.50$',
+                    r'$\varepsilon_{S} = 0.25$'
                     ],
                    frameon=True,
                    fontsize=10,
