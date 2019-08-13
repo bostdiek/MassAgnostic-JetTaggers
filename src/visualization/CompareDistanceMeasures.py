@@ -1,6 +1,7 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 import matplotlib.gridspec as gs
 import numpy as np
 from pathlib import Path
@@ -86,7 +87,16 @@ for prong in [2, 3, 4]:
     if prong == 2:
         plt.ylabel('Histogram Distance')
         # plt.ylabel('Bhat. Dist.')
-        plt.legend([base, pca, planed, uboost, adversary],
+        plt.legend([Patch(facecolor='C0',
+                          label='Original'),
+                    Patch(facecolor='C3',
+                          label='PCA'),
+                    Patch(facecolor='C2',
+                          label='Planed'),
+                    Patch(facecolor='blue',
+                          label='uBoost'),
+                    Patch(facecolor='C4',
+                          label='Adv')],
                    ['Original', 'PCA', 'Planed', 'uBoost',
                     'Adv'],
                    fontsize=10,
