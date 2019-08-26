@@ -27,46 +27,52 @@ make GBC
     ├── README.md            <- The top-level README for developers using this project.
     ├── data
     │   ├── interim          <- Intermediate data that has been transformed.
-    │   ├── processed        <- The final, canonical data sets for modeling.
     │   ├── modelprediction  <- The final, canonical data sets
     │   └── raw              <- The original, immutable data dump.
     │
     │
-    ├── models               <- Trained and serialized models, model predictions, or model summaries
+    ├── models               <- Trained and serialized models and histories
+    │   ├── adv              <- Adversarial trained networks
+    │   └── histories        <- Adversarial training histories
     │
     ├── notebooks            <- Jupyter notebooks. Naming convention is a number (for ordering),
     │                         the creator's initials, and a short `-` delimited description, e.g.
     │                         `01-bo-CheckScaling.ipynb`.
     │
-    ├── references           <- Data dictionaries, manuals, and all other explanatory materials.
-    │
     ├── reports              <- Generated analysis as HTML, PDF, LaTeX, etc.
     │   └── figures          <- Generated graphics and figures to be used in reporting
     │
-    ├── requirements.txt     <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
+    ├── environment.yml     <- The requirements file for reproducing the analysis environment
     │
     ├── setup.py             <- makes project pip installable (pip install -e .) so src can be imported
-    ├── src                  <- Source code for use in this project.
-    │   ├── __init__.py      <- Makes src a Python module
-    │   │
-    │   ├── data             <- Scripts to download or generate data
-    │   │   └── make_dataset.py
-    │   │
-    │   ├── models           <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   ├── train_base_nn.py
-    │   │   ├── train_uBoost.py
-    │   │   └── train_AdaBoost.py
-    │   │
-    │   ├── test_metrics     <- Scripts to take histograms and compute metrics
-    │   │   └── build_features.py
-    │   │
-    │   └── visualization    <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    └── tox.ini              <- tox file with settings for running tox; see tox.testrun.org
+    └── src                  <- Source code for use in this project.
+        ├── __init__.py      <- Makes src a Python module
+        │
+        ├── data             <- Scripts to download or generate data
+        │   ├── make_dataset.py   
+        │   ├── get_weights_1d.py  <- Planing
+        │   ├── PCA_scaler.py      <- PCA rotation
+        │   └── process_data.py    <- Runs the preprocessing
+        │
+        ├── models           <- Scripts to train models and then use trained models to make
+        │   │                 predictions
+        │   ├── HelperFunctions.py
+        │   ├── predict_model.py
+        │   ├── train_Adversarial.py
+        │   ├── train_base_nn.py
+        │   ├── train_BDT.py
+        │   ├── train_PCA_BDT.py
+        │   ├── train_PCA_nn.py
+        │   ├── train_planed_BDT.py
+        │   ├── train_planed_nn.py
+        │   └── train_uBoost.py
+        │
+        ├── test_metrics     <- Scripts to take histograms and compute metrics
+        │   ├── Distances.py
+        │   └── run_metrics.py
+        │
+        └── visualization    <- Scripts to create exploratory and results oriented visualizations
+
 
 
 --------
