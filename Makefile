@@ -59,10 +59,10 @@ planed_nn: data
 	$(PYTHON_INTERPRETER) src/models/train_planed_nn.py --prong=4 --save=True
 
 ## Train BDT on Planed data
-planed_gbc: data
-	$(PYTHON_INTERPRETER) src/models/train_planed_GBC.py --prong=2 --save=True
-	$(PYTHON_INTERPRETER) src/models/train_planed_GBC.py --prong=3 --save=True
-	$(PYTHON_INTERPRETER) src/models/train_planed_GBC.py --prong=4 --save=True
+planed_bdt: data
+	$(PYTHON_INTERPRETER) src/models/train_planed_BDT.py --prong=2 --save=True
+	$(PYTHON_INTERPRETER) src/models/train_planed_BDT.py --prong=3 --save=True
+	$(PYTHON_INTERPRETER) src/models/train_planed_BDT.py --prong=4 --save=True
 
 ## Train networks on PCA scaled data
 pca_nn: data
@@ -71,10 +71,10 @@ pca_nn: data
 	$(PYTHON_INTERPRETER) src/models/train_PCA_nn.py --prong=4 --save=True
 
 ## Train BDT on PCA data
-pca_gbc: data
-	$(PYTHON_INTERPRETER) src/models/train_PCA_GBC.py --prong=2 --save=True
-	$(PYTHON_INTERPRETER) src/models/train_PCA_GBC.py --prong=3 --save=True
-	$(PYTHON_INTERPRETER) src/models/train_PCA_GBC.py --prong=4 --save=True
+pca_bdt: data
+	$(PYTHON_INTERPRETER) src/models/train_PCA_BDT.py --prong=2 --save=True
+	$(PYTHON_INTERPRETER) src/models/train_PCA_BDT.py --prong=3 --save=True
+	$(PYTHON_INTERPRETER) src/models/train_PCA_BDT.py --prong=4 --save=True
 
 ## Train uBoost classifiers
 uBoost: data
@@ -83,10 +83,10 @@ uBoost: data
 	$(PYTHON_INTERPRETER) src/models/train_uBoost.py --prong=4 --save=True
 
 ## Train Gradient Boosting Classifiers
-GBC: data
-	$(PYTHON_INTERPRETER) src/models/train_GBC.py --prong=2 --save=True
-	$(PYTHON_INTERPRETER) src/models/train_GBC.py --prong=3 --save=True
-	$(PYTHON_INTERPRETER) src/models/train_GBC.py --prong=4 --save=True
+BDT: data
+	$(PYTHON_INTERPRETER) src/models/train_BDT.py --prong=2 --save=True
+	$(PYTHON_INTERPRETER) src/models/train_BDT.py --prong=3 --save=True
+	$(PYTHON_INTERPRETER) src/models/train_BDT.py --prong=4 --save=True
 
 ## Make the histograms from the predictions
 predictions: data

@@ -17,8 +17,14 @@ The models have already been trained, and the training takes quite a bit of time
 ```
 make base_nn
 make uBoost
-make GBC
+make BDT
+make planed_nn
+make planed_bdt
+make pca_nn
+make pca_bdt
 ```
+### Predictions and Metrics
+The predictions for the test data can be made using `make predictions`. After the predictions are made, the metrics are computed with `make metrics`.
 
 ## Project Organization
 
