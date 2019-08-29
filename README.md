@@ -1,7 +1,18 @@
 # Mass Agnostic Jet Taggers
 Layne Bradshaw, Rashmish K. Misha, Andrea Mitridate, and Bryan Ostdiek
 
-This project explores the benefits of different methods to decorrelate the jet mass from a machine learning jet tagger. The paper can be found at [https://arxiv.org/abs/1908.08959].
+This project explores the benefits of different methods to decorrelate the jet mass from a machine learning jet tagger. The paper can be found at [https://arxiv.org/abs/1908.08959]. If you use any of the results from this study, please cite:
+```
+@article{Bradshaw:2019ipy,
+      author         = "Bradshaw, Layne and Mishra, Rashmish K. and Mitridate,
+                        Andrea and Ostdiek, Bryan",
+      title          = "{Mass Agnostic Jet Taggers}",
+      year           = "2019",
+      eprint         = "1908.08959",
+      archivePrefix  = "arXiv",
+      primaryClass   = "hep-ph",
+      SLACcitation   = "%%CITATION = ARXIV:1908.08959;%%"
+}```
 
 ## Getting started
 For reproducibility, we have included the environment we used.
