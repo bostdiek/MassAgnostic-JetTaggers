@@ -12,7 +12,8 @@ This project explores the benefits of different methods to decorrelate the jet m
       archivePrefix  = "arXiv",
       primaryClass   = "hep-ph",
       SLACcitation   = "%%CITATION = ARXIV:1908.08959;%%"
-}```
+}
+```
 
 ## Getting started
 For reproducibility, we have included the environment we used.
